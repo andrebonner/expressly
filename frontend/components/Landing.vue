@@ -5,14 +5,14 @@
         <a-col :span="12">
           <a-card title="Church" :bordered="true">
             <p>
-              <router-link to="search/church"> Book spot in church</router-link>
+              <nuxt-link to="search/church"> Book spot in church</nuxt-link>
             </p>
           </a-card>
         </a-col>
         <a-col :span="12">
           <a-card title="Office" :bordered="true">
             <p>
-              <router-link to="search/space"> Book space in line</router-link>
+              <nuxt-link to="search/space"> Book space in line</nuxt-link>
             </p>
           </a-card>
         </a-col>
