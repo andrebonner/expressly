@@ -35,13 +35,13 @@
       >
         Book <a-icon type="right" /> </a-button
     ></a-row>
-    <a-modal v-model="visible" title="Title" on-ok="handleOk">
+    <a-modal v-model="visible" title="Title" on-ok="handleClick">
       <template slot="footer">
         <a-button
           key="submit"
           type="primary"
           :loading="loading"
-          @click="handleOk"
+          @click="handleClick"
         >
           Complete Booking
         </a-button>
