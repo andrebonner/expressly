@@ -6,22 +6,22 @@
           <img
             slot="cover"
             alt="example"
-            src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
+            src="https://images.unsplash.com/photo-1564540574859-0dfb63985953?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=470&q=80"
           />
         </a-card>
       </a-col>
       <a-col :span="12">
         <a-descriptions :title="capitalize(type) + ' Details'">
-          <a-descriptions-item label="UserName">
-            Zhou Maomao
+          <a-descriptions-item label="Name">
+            Abbley Church of God
           </a-descriptions-item>
           <a-descriptions-item label="Telephone">
             1810000000
           </a-descriptions-item>
-          <a-descriptions-item label="Live">
+          <a-descriptions-item label="Location">
             Hangzhou, Zhejiang
           </a-descriptions-item>
-          <a-descriptions-item label="Remark"> empty </a-descriptions-item>
+
           <a-descriptions-item label="Address">
             No. 18, Wantang Road, Xihu District, Hangzhou, Zhejiang, China
           </a-descriptions-item>
@@ -56,6 +56,17 @@
 </template>
 <script>
 export default {
+  head() {
+    return {
+      titleTemplate: "%s - Details",
+      meta: [
+        { charset: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { hid: "description", name: "description", content: "Landing Page" },
+      ],
+      link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+    };
+  },
   data() {
     return {
       type: "",

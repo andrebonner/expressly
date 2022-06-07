@@ -20,6 +20,17 @@ import SpaceForm from "~/components/search/SpaceForm.vue";
 import ResultTable from "~/components/search/ResultTable.vue";
 
 export default {
+  head() {
+    return {
+      titleTemplate: "%s - Search",
+      meta: [
+        { charset: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { hid: "description", name: "description", content: "Landing Page" },
+      ],
+      link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+    };
+  },
   data() {
     return {
       activeKey: "church",
