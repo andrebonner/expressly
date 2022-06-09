@@ -6,7 +6,7 @@
       backgroundPostion: 'center center',
       backgroundSize: 'cover',
       backgroundAttachment: 'fixed',
-      backgroundImage: 'url(\'business_chat.png\')',
+      backgroundImage: 'url(\'business_chat.svg\')',
       minHeight: '75vh',
     }"
   >

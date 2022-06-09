@@ -6,16 +6,25 @@
     autocomplete="off"
     @submit="handleSubmit"
   >
-    <a-form-item name="select" has-feedback>
-      <a-select :style="{ width: '100px' }" placeholder="Area">
-        <a-select-option value="china">China</a-select-option>
-        <a-select-option value="usa">U.S.A</a-select-option>
+    <a-form-item name="area" has-feedback>
+      <a-select
+        v-decorator="['area']"
+        :style="{ width: '200px' }"
+        placeholder="Area"
+      >
+        <a-select-option v-for="a in areas" :key="a.code">{{
+          a.name
+        }}</a-select-option>
       </a-select>
     </a-form-item>
-    <a-form-item name="select" has-feedback>
-      <a-select :style="{ width: '100px' }" placeholder="Institution">
-        <a-select-option v-for="i in institutions" :key="i.value">{{
-          i.label
+    <a-form-item name="institution" has-feedback>
+      <a-select
+        v-decorator="['institution']"
+        :style="{ width: '200px' }"
+        placeholder="Institution"
+      >
+        <a-select-option v-for="i in institutions" :key="i.code">{{
+          i.name
         }}</a-select-option>
       </a-select>
     </a-form-item>
@@ -45,7 +54,9 @@
         value-format="YYYY-MM-DD"
       /> </a-form-item
     ><a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-      <a-button type="primary" html-type="submit">Search</a-button>
+      <a-button type="primary" html-type="submit"
+        ><a-icon type="search" />Search</a-button
+      >
     </a-form-item>
   </a-form>
 </template>
@@ -54,20 +65,25 @@ export default {
   data() {
     return {
       activeKey: "church",
-      areas: [
-        { label: "Beijing", value: "Beijing" },
-        { label: "Shanghai", value: "Shanghai" },
-      ],
-      institutions: [
-        { label: "Bascho", value: "Bascho" },
-        { label: "Fontana", value: "Fontana" },
-        { label: "Mega Mart", value: "MegaMart" },
-        { label: "Super +", value: "SuperPlus" },
-      ],
+      areas: [],
+      institutions: [],
       form: this.$form.createForm(this),
     };
   },
+  mounted() {
+    this.getAreas();
+    this.getInstitutions();
+  },
   methods: {
+    async getAreas() {
+      const response = await this.$axios.get("/api/areas/space");
+      this.areas = response.data;
+    },
+    async getInstitutions() {
+      const response = await this.$axios.get("/api/institutions/space");
+      this.institutions = response.data;
+    },
+
     handleSubmit(e) {
       e.preventDefault();
       console.log(e);

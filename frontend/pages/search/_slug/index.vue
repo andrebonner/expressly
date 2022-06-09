@@ -40,76 +40,18 @@ export default {
       },
     };
   },
+
   methods: {
+    async search(type, params) {
+      const response = await this.$axios.get("/api/schedules?type=" + type, {
+        params,
+      });
+      this.results = { type, data: response.data };
+    },
     showTable(values) {
-      console.log(this.activeKey, values);
-      this.results = {
-        type: this.activeKey,
-        data: [
-          {
-            id: "1",
-            area: "Kingston",
-            institution: "Temple",
-            date: "2020-01-01",
-          },
-          {
-            id: "2",
-            area: "Kingston",
-            institution: "Unitarian",
-            date: "2020-01-01",
-          },
-          {
-            id: "3",
-            area: "Kingston",
-            institution: "Temple",
-            date: "2020-01-01",
-          },
-          {
-            id: "4",
-            area: "Kingston",
-            institution: "Unitarian",
-            date: "2020-01-01",
-          },
-          {
-            id: "5",
-            area: "Kingston",
-            institution: "Temple",
-            date: "2020-01-01",
-          },
-          {
-            id: "6",
-            area: "Kingston",
-            institution: "Unitarian",
-            date: "2020-01-01",
-          },
-          {
-            id: "7",
-            area: "Kingston",
-            institution: "Temple",
-            date: "2020-01-01",
-          },
-          {
-            id: "8",
-            area: "Kingston",
-            institution: "Unitarian",
-            date: "2020-01-01",
-          },
-          {
-            id: "9",
-            area: "Kingston",
-            institution: "Temple",
-            date: "2020-01-01",
-          },
-          {
-            id: "10",
-            area: "Kingston",
-            institution: "Unitarian",
-            date: "2020-01-01",
-          },
-        ],
-      };
       this.$nextTick(() => {
         this.$nuxt.$loading.start();
+        this.search(this.activeKey, values);
         setTimeout(() => {
           this.$nuxt.$loading.finish();
         }, 500);

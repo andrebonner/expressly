@@ -5,25 +5,27 @@
         <a-card hoverable :style="{ width: '240px', padding: '4px' }">
           <img
             slot="cover"
-            alt="example"
+            :alt="capitalize(type)"
             src="https://images.unsplash.com/photo-1564540574859-0dfb63985953?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=470&q=80"
           />
         </a-card>
       </a-col>
       <a-col :span="12">
-        <a-descriptions :title="capitalize(type) + ' Details'">
+        <a-descriptions
+          :title="capitalize(type) + ' Details ' + dateFormat(schedule.date)"
+        >
           <a-descriptions-item label="Name">
-            Abbley Church of God
+            {{ schedule.institution ? schedule.institution.name : "" }}
           </a-descriptions-item>
           <a-descriptions-item label="Telephone">
-            1810000000
+            {{ schedule.institution ? schedule.institution.telephone : "" }}
           </a-descriptions-item>
           <a-descriptions-item label="Location">
-            Hangzhou, Zhejiang
+            {{ schedule.area }}
           </a-descriptions-item>
 
           <a-descriptions-item label="Address">
-            No. 18, Wantang Road, Xihu District, Hangzhou, Zhejiang, China
+            {{ schedule.institution ? schedule.institution.address : "" }}
           </a-descriptions-item>
         </a-descriptions></a-col
       > </a-row
@@ -33,9 +35,14 @@
         :style="{ float: 'right' }"
         @click="openBookModal"
       >
-        Book <a-icon type="right" /> </a-button
+        Book {{ schedule.time ? timeFormat(schedule.time) : "" }}
+        <a-icon type="right" /> </a-button
     ></a-row>
-    <a-modal v-model="visible" title="Title" on-ok="handleClick">
+    <a-modal
+      v-model="visible"
+      title="Information/Agreement"
+      on-ok="handleClick"
+    >
       <template slot="footer">
         <a-button
           key="submit"
@@ -72,10 +79,17 @@ export default {
       type: "",
       visible: false,
       loading: false,
+      schedule: {},
     };
   },
   props: {},
   methods: {
+    async getDetails(type, id) {
+      const response = await this.$axios.get(
+        "/api/schedules/" + type + "/" + id
+      );
+      this.schedule = response.data;
+    },
     openBookModal() {
       this.visible = true;
     },
@@ -90,10 +104,28 @@ export default {
     capitalize(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
     },
+    timeFormat(time) {
+      // TODO: format time better
+      let hours = parseInt(time.split(":")[0]);
+      let minutes = parseInt(time.split(":")[1]);
+      let ampm = hours >= 12 ? " PM" : " AM";
+      hours = hours % 12;
+      let strTime = hours + ":" + minutes + ampm;
+      return strTime;
+    },
+    dateFormat(date) {
+      let d = new Date(date);
+      let day = d.getDate(); // Day of the month without leading zeros
+      let month = d.getMonth() + 1; // Month without leading zeros
+      let year = d.getFullYear(); // Year
+      let dateString = day + "/" + month + "/" + year;
+      return dateString;
+    },
   },
   mounted() {
     console.log(this.$route.params);
     this.type = this.$route.params.slug;
+    this.getDetails(this.type, this.$route.params.id);
   },
 };
 </script>

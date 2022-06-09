@@ -3,6 +3,8 @@
     :columns="columns"
     :row-key="(record) => record.id"
     :data-source="values.data"
+    :pagination="{ pageSize: 10 }"
+    :scroll="{ y: 240 }"
     v-show="values.data.length > 0"
   >
     <span slot="customTitle">{{
