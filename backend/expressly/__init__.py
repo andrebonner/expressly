@@ -14,13 +14,17 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     mail.init_app(app)
 
+    from expressly.auth.routes import auth
     from expressly.areas.routes import areas
+    from expressly.bookings.routes import bookings
     from expressly.institutions.routes import institutions
     from expressly.schedules.routes import schedules
     from expressly.main.routes import main
     from expressly.errors.handlers import errors
 
+    app.register_blueprint(auth, url_prefix='/api')
     app.register_blueprint(areas, url_prefix='/api')
+    app.register_blueprint(bookings, url_prefix='/api')
     app.register_blueprint(institutions, url_prefix='/api')
     app.register_blueprint(schedules, url_prefix='/api')
     app.register_blueprint(main)

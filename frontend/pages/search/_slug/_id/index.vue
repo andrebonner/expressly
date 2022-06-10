@@ -12,7 +12,11 @@
       </a-col>
       <a-col :span="12">
         <a-descriptions
-          :title="capitalize(type) + ' Details ' + dateFormat(schedule.date)"
+          :title="
+            capitalize(type) +
+            ' Details ' +
+            (schedule.date ? dateFormat(schedule.date) : '')
+          "
         >
           <a-descriptions-item label="Name">
             {{ schedule.institution ? schedule.institution.name : "" }}
@@ -53,11 +57,22 @@
           Complete Booking
         </a-button>
       </template>
-      <p>Some contents...</p>
-      <p>Some contents...</p>
-      <p>Some contents...</p>
-      <p>Some contents...</p>
-      <p>Some contents...</p>
+      <p>
+        This agreement is made between you
+        {{ $auth.isloggedIn ? $auth.user.name : "" }} and {{ "Expressly" }}.
+      </p>
+      <p>
+        The booking is for
+        {{ schedule.institution ? schedule.institution.name : "" }} on the
+        {{ schedule.date ? dateFormat(schedule.date) : "" }} at
+        {{ schedule.time ? timeFormat(schedule.time) : "" }}.
+      </p>
+      <p>
+        You may contact
+        {{ schedule.institution ? schedule.institution.name : "" }} by phone
+        {{ schedule.institution ? schedule.institution.telephone : "" }} or
+        email {{ schedule.institution ? schedule.institution.email : "" }}
+      </p>
     </a-modal>
   </section>
 </template>
@@ -85,21 +100,45 @@ export default {
   props: {},
   methods: {
     async getDetails(type, id) {
-      const response = await this.$axios.get(
-        "/api/schedules/" + type + "/" + id
-      );
-      this.schedule = response.data;
+      await this.$axios
+        .get("/api/schedules/" + type + "/" + id)
+        .then((response) => {
+          this.schedule = response.data;
+        });
     },
     openBookModal() {
-      this.visible = true;
+      if (this.$auth.loggedIn) {
+        this.visible = true;
+      } else {
+        this.$message.error("You must be logged in to book a slot");
+        this.$router.push({
+          path: "/login",
+          query: {
+            redirect: this.$route.fullPath,
+          },
+        });
+      }
     },
-    handleClick(row) {
-      this.type = row.type;
-      this.loading = true;
-      setTimeout(() => {
-        this.visible = false;
+
+    async handleClick(e) {
+      try {
+        this.loading = true;
+        const result = await this.createBooking();
+
+        if (result.success) {
+          this.$message.success("Booking successful");
+          this.visible = false;
+          this.$router.push({
+            path: "/bookings",
+          });
+        } else {
+          this.$message.error(result.message);
+        }
+      } catch (error) {
+        this.$message.error(error.message);
+      } finally {
         this.loading = false;
-      }, 3000);
+      }
     },
     capitalize(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
@@ -120,6 +159,14 @@ export default {
       let year = d.getFullYear(); // Year
       let dateString = day + "/" + month + "/" + year;
       return dateString;
+    },
+    async createBooking() {
+      const response = await this.$axios.post("/api/bookings", {
+        schedule_id: this.schedule.id,
+        user_id: this.$auth.user.id,
+      });
+
+      return response.data;
     },
   },
   mounted() {

@@ -66,6 +66,8 @@ export default {
       console.log(this.values.type);
     },
   },
-  mounted() {},
+  mounted() {
+    console.log(this.values);
+  },
 };
 </script>

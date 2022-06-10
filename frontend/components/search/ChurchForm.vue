@@ -11,6 +11,7 @@
         v-decorator="['area']"
         :style="{ width: '200px' }"
         placeholder="Area"
+        :loading="areaLoading"
       >
         <a-select-option v-for="a in areas" :key="a.code">{{
           a.name
@@ -22,6 +23,7 @@
         v-decorator="['institution']"
         :style="{ width: '200px' }"
         placeholder="Church"
+        :loading="institutionLoading"
       >
         <a-select-option v-for="c in churches" :key="c.code">{{
           c.name
@@ -51,18 +53,26 @@ export default {
     return {
       activeKey: "church",
       areas: [],
+      areaLoading: false,
       churches: [],
+      institutionLoading: false,
       form: this.$form.createForm(this),
     };
   },
   methods: {
     async getAreas() {
-      const response = await this.$axios.get("/api/areas/church");
-      this.areas = response.data;
+      this.areaLoading = true;
+      await this.$axios.get("/api/areas/church").then((res) => {
+        this.areas = res.data;
+        this.areaLoading = false;
+      });
     },
     async getChurches() {
-      const response = await this.$axios.get("/api/institutions/church");
-      this.churches = response.data;
+      this.institutionLoading = true;
+      await this.$axios.get("/api/institutions/church").then((res) => {
+        this.churches = res.data;
+        this.institutionLoading = false;
+      });
     },
     handleSubmit(e) {
       e.preventDefault();

@@ -43,10 +43,14 @@ export default {
 
   methods: {
     async search(type, params) {
-      const response = await this.$axios.get("/api/schedules?type=" + type, {
-        params,
-      });
-      this.results = { type, data: response.data };
+      await this.$axios
+        .get("/api/schedules?type=" + type, {
+          params,
+        })
+        .then((response) => {
+          this.results.type = type;
+          this.results.data = response.data;
+        });
     },
     showTable(values) {
       this.$nextTick(() => {
@@ -60,7 +64,7 @@ export default {
   },
   mounted() {
     console.log(this.showResults);
-    console.log("SearchPage mounted", this.$route.params.slug);
+    console.log("SearchPage mounted", this.$route.query);
     this.activeKey = this.$route.params.slug;
   },
   components: { ChurchForm, SpaceForm, ResultTable },

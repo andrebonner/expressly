@@ -17,6 +17,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, nullable=False)
+    bookings = db.relationship('Booking', backref='user', lazy=True)
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -111,6 +112,7 @@ class Schedule(db.Model):
     area_code = db.Column(db.String(50), db.ForeignKey(
         'areas.code'), nullable=False)
     space_count = db.Column(db.Integer, nullable=False)
+    booking = db.relationship('Booking', backref='schedule', lazy=True)
 
     @classmethod
     def seed(self, fake):

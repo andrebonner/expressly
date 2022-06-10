@@ -10,9 +10,13 @@
         <a-form-item>
           <a-input
             v-decorator="[
-              'userName',
+              'username',
               {
                 rules: [
+                  {
+                    type: 'email',
+                    message: 'The input is not valid E-mail!',
+                  },
                   { required: true, message: 'Please input your username!' },
                 ],
               },
@@ -58,14 +62,14 @@
           >
             Remember me
           </a-checkbox>
-          <router-link class="login-form-forgot" to="/forgot-password">
+          <nuxt-link class="login-form-forgot" to="/forgot-password">
             Forgot password
-          </router-link>
+          </nuxt-link>
           <a-button type="primary" html-type="submit" class="login-form-button">
             Log in
           </a-button>
           Or
-          <router-link to="/register"> register now! </router-link>
+          <nuxt-link to="/register"> register now! </nuxt-link>
         </a-form-item>
       </a-form></a-card
     >
@@ -94,8 +98,29 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           console.log("Received values of form: ", values);
+          this.login(values);
         }
       });
+    },
+    async login(form) {
+      try {
+        let response = await this.$auth.loginWith("local", {
+          data: form,
+        });
+        const result = response.data;
+        if (result.success) {
+          this.$message.success(result.message);
+          if (this.$route.query.redirect) {
+            this.$router.push(this.$route.query.redirect);
+          } else {
+            this.$router.push("/");
+          }
+        } else {
+          this.$message.error(result.message);
+        }
+      } catch (error) {
+        this.$message.error(error.message);
+      }
     },
   },
 };
