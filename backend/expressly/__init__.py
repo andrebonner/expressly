@@ -19,6 +19,7 @@ def create_app(config_class=Config):
     from expressly.bookings.routes import bookings
     from expressly.institutions.routes import institutions
     from expressly.schedules.routes import schedules
+    from expressly.users.routes import users
     from expressly.main.routes import main
     from expressly.errors.handlers import errors
 
@@ -27,6 +28,7 @@ def create_app(config_class=Config):
     app.register_blueprint(bookings, url_prefix='/api')
     app.register_blueprint(institutions, url_prefix='/api')
     app.register_blueprint(schedules, url_prefix='/api')
+    app.register_blueprint(users, url_prefix='/api')
     app.register_blueprint(main)
     app.register_blueprint(errors)
 

@@ -14,7 +14,7 @@
         <a-descriptions
           :title="
             capitalize(type) +
-            ' Details ' +
+            ' Details  - ' +
             (schedule.date ? dateFormat(schedule.date) : '')
           "
         >
@@ -84,7 +84,7 @@ export default {
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { hid: "description", name: "description", content: "Landing Page" },
+        { hid: "description", name: "description", content: "Details" },
       ],
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
     };
@@ -153,12 +153,10 @@ export default {
       return strTime;
     },
     dateFormat(date) {
+      // TODO: format date better
       let d = new Date(date);
-      let day = d.getDate(); // Day of the month without leading zeros
-      let month = d.getMonth() + 1; // Month without leading zeros
-      let year = d.getFullYear(); // Year
-      let dateString = day + "/" + month + "/" + year;
-      return dateString;
+
+      return d.toDateString();
     },
     async createBooking() {
       const response = await this.$axios.post("/api/bookings", {

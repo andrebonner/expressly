@@ -15,10 +15,28 @@
       </div>
     </a-layout-content>
     <a-layout-footer :style="{ textAlign: 'center' }">
-      Ant Design ©2018 Created by Ant UED
+      Expressly ©2022 Created by Andre Bonner
     </a-layout-footer>
   </a-layout>
 </template>
+<script>
+export default {
+  computed: {
+    connectionStatus() {
+      return this.$nuxt.isOffline;
+    },
+  },
+  watch: {
+    connectionStatus(status) {
+      if (status) {
+        this.$message.error("You are offline now");
+      } else {
+        this.$message.success("You are online now");
+      }
+    },
+  },
+};
+</script>
 <style>
 .logo {
   width: 120px;

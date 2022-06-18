@@ -7,6 +7,10 @@
     :scroll="{ y: 240 }"
     v-show="values.data.length > 0"
   >
+    <span slot="area" slot-scope="text, record">{{ record.area.name }}</span>
+    <span slot="institution" slot-scope="text, record">{{
+      record.institution.name
+    }}</span>
     <span slot="customTitle">{{
       values.type == "church" ? "Church" : "Institution"
     }}</span>
@@ -24,11 +28,13 @@ const columns = [
     dataIndex: "area",
     key: "area",
     title: "Area",
+    scopedSlots: { customRender: "area" },
   },
   {
     dataIndex: "institution",
     key: "institution",
     slots: { title: "customTitle" },
+    scopedSlots: { customRender: "institution" },
   },
   {
     title: "Date/Time",

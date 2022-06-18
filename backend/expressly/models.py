@@ -3,7 +3,7 @@ from enum import unique
 import random
 from uuid import uuid4
 from expressly import db, bcrypt
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_login import UserMixin
 from flask import current_app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -94,6 +94,7 @@ class Institution(db.Model):
             a = Institution.query.filter_by(code=inst_code).first()
             if a is None:
                 break
+        print(fake.phone_number())
         institution = Institution(code=inst_code, name=fake.company(), email=fake.email(),
                                   telephone=fake.phone_number(), address=fake.address(),  type=inst_type[random.randint(0, len(inst_type)-1)])
         db.session.add(institution)
@@ -120,7 +121,7 @@ class Schedule(db.Model):
         institution = Institution.query.all()
         for i in range(len(area)):
             for j in range(len(institution)):
-                schedule = Schedule(date=datetime.now().date(), time=datetime.now().time(),
+                schedule = Schedule(date=(datetime.now()+timedelta(days=random.randint(1, 4))).date(), time=datetime.now().time(),
                                     institution_code=institution[j].code, area_code=area[i].code, space_count=random.randint(10, 100))
                 db.session.add(schedule)
 
@@ -137,6 +138,7 @@ class Booking(db.Model):
         'users.id'), nullable=False)
     space_count = db.Column(db.Integer, nullable=False)
     status = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     @classmethod
     def seed(self, fake):

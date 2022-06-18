@@ -41,6 +41,7 @@
       ]"
     >
       <a-date-picker
+        :disabled-date="disabledDate"
         v-decorator="[
           'date',
           {
@@ -63,6 +64,7 @@
   </a-form>
 </template>
 <script>
+import moment from "moment";
 export default {
   data() {
     return {
@@ -103,6 +105,10 @@ export default {
           this.$emit("submitSpaceSearch", values);
         }
       });
+    },
+    disabledDate(current) {
+      // Can not select days before today and today
+      return current && current < moment().endOf("day");
     },
   },
 };

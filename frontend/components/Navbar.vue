@@ -21,11 +21,15 @@
       mode="horizontal"
       theme="dark"
       :style="{ lineHeight: '64px', float: 'right' }"
-    >
-      <a-menu-item key="1" :title="$auth.user.name"
+      ><a-menu-item key="1" v-if="$auth.user.is_admin"
+        ><nuxt-link to="/admin">Admin</nuxt-link>
+      </a-menu-item>
+
+      <a-menu-item key="2" :title="$auth.user.name"
         ><nuxt-link to="/profile">Profile</nuxt-link>
       </a-menu-item>
-      <a-menu-item key="2" @click="logout()">Logout </a-menu-item>
+
+      <a-menu-item key="3" @click="logout()">Logout </a-menu-item>
     </a-menu>
   </nav>
 </template>

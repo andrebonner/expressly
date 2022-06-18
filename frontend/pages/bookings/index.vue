@@ -2,7 +2,7 @@
   <section>
     <a-calendar :loading="loading">
       <ul slot="dateCellRender" slot-scope="value" class="events">
-        <li v-for="item in getListData(value)" :key="item.content">
+        <li v-for="item in getListData(value)" :key="item.id">
           <a-badge :status="item.type" :text="item.content" />
         </li>
       </ul>
@@ -17,6 +17,21 @@
 </template>
 <script>
 export default {
+  head() {
+    return {
+      titleTemplate: "%s - Booking Calendar",
+      meta: [
+        { charset: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        {
+          hid: "description",
+          name: "description",
+          content: "Booking Calendar",
+        },
+      ],
+      link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+    };
+  },
   middleware: ["auth"],
   data() {
     return {
@@ -37,42 +52,36 @@ export default {
       });
     },
     getListData(value) {
-      let listData;
-      switch (value.date()) {
-        case 8:
-          listData = [
-            { type: "warning", content: "This is warning event." },
-            { type: "success", content: "This is usual event." },
-          ];
-          break;
-        case 10:
-          listData = [
-            { type: "warning", content: "This is warning event." },
-            { type: "success", content: "This is usual event." },
-            { type: "error", content: "This is error event." },
-          ];
-          break;
-        case 15:
-          listData = [
-            { type: "warning", content: "This is warning event" },
-            {
-              type: "success",
-              content: "This is very long usual event。。....",
-            },
-            { type: "error", content: "This is error event 1." },
-            { type: "error", content: "This is error event 2." },
-            { type: "error", content: "This is error event 3." },
-            { type: "error", content: "This is error event 4." },
-          ];
-          break;
-        default:
+      let listData, bookingData;
+      if (value.date) {
+        bookingData = this.bookings.filter((item) => {
+          const dt = new Date(item.date);
+          //console.log(dt.toLocaleDateString(), value.format("M/D/YYYY"));
+          return dt.toLocaleDateString() === value.format("M/D/YYYY");
+        });
+        listData = bookingData.map((item) => {
+          return {
+            id: item.id,
+            type: "success",
+            content: `${item.institution.name} @ ${item.time}`,
+          };
+        });
+        //console.log(listData);
       }
+
       return listData || [];
     },
 
     getMonthData(value) {
-      if (value.month() === 8) {
-        return 1394;
+      const dt = new Date();
+      console.log(value.month(), dt.getMonth() + 1);
+      if (value.month() === dt.getMonth()) {
+        let monthData = this.bookings.filter((item) => {
+          const dt2 = new Date(item.date);
+          console.log(dt2);
+          return dt2.getFullYear() === value.year();
+        });
+        return monthData.length || 0;
       }
     },
   },
