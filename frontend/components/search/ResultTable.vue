@@ -11,8 +11,16 @@
     <span slot="institution" slot-scope="text, record">{{
       record.institution.name
     }}</span>
-    <span slot="customTitle">{{
+    <span slot="date" slot-scope="text, record">{{
+      values.type == "church"
+        ? dateFormat(record.date)
+        : dateFormat(record.date) + " : " + timeFormat(record.time)
+    }}</span>
+    <span slot="customIntsTitle">{{
       values.type == "church" ? "Church" : "Institution"
+    }}</span>
+    <span slot="customDateTimeTitle">{{
+      values.type == "church" ? "Date" : "Date/Time"
     }}</span>
     <span slot="action" slot-scope="text, record">
       <a-button type="primary" @click="handleClick(record)">
@@ -23,6 +31,7 @@
   </a-table>
 </template>
 <script>
+import moment from "moment";
 const columns = [
   {
     dataIndex: "area",
@@ -33,13 +42,14 @@ const columns = [
   {
     dataIndex: "institution",
     key: "institution",
-    slots: { title: "customTitle" },
+    slots: { title: "customIntsTitle" },
     scopedSlots: { customRender: "institution" },
   },
   {
-    title: "Date/Time",
     key: "date",
     dataIndex: "date",
+    slots: { title: "customDateTimeTitle" },
+    scopedSlots: { customRender: "date" },
   },
   {
     title: "Action",
@@ -65,6 +75,12 @@ export default {
     },
   },
   methods: {
+    dateFormat(date) {
+      return moment(date).format("MMM DD, YYYY");
+    },
+    timeFormat(time) {
+      return moment(time.split(".")[0], "HH:mm:ss").format("hh:mm A");
+    },
     handleClick(row) {
       this.$router.push({
         path: this.values.type + "/" + row.id,
@@ -72,8 +88,6 @@ export default {
       console.log(this.values.type);
     },
   },
-  mounted() {
-    console.log(this.values);
-  },
+  mounted() {},
 };
 </script>

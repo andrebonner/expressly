@@ -13,6 +13,7 @@ def index():
     aes = []
     for area in areas:
         a = {
+            'id': area.id,
             'code': area.code,
             'name': area.name,
             'institutions': []
@@ -31,7 +32,7 @@ def show(type):
     for institution in institutions:
         for area in institution.areas:
             if next((a for a in insts if a['code'] == area.code), None) is None:
-                a = {'code': area.code, 'name': area.name}
+                a = {'id': area.id, 'code': area.code, 'name': area.name}
                 insts.append(a)
     return jsonify(insts)
 
@@ -45,6 +46,7 @@ def show_by_code(type, code):
     aes = []
     for area in areas:
         a = {
+            'id': area.id,
             'code': area.code,
             'name': area.name,
             'institutions': []
@@ -59,7 +61,7 @@ def show_by_code(type, code):
 @areas.route('/areas', methods=['POST'])
 @token_required
 def create(current_user):
-    if not current_user.admin:
+    if not current_user.is_admin:
         return jsonify({'success': False, 'message': 'permission denied'})
     data = request.get_json()
     area = Area(code=data['code'], name=data['name'])
@@ -71,7 +73,7 @@ def create(current_user):
 @areas.route('/areas/<code>', methods=['PUT'])
 @token_required
 def update(current_user, code):
-    if not current_user.admin:
+    if not current_user.is_admin:
         return jsonify({'success': False, 'message': 'permission denied'})
     data = request.get_json()
     area = Area.query.filter_by(code=code).first()

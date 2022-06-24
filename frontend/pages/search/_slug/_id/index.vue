@@ -77,6 +77,7 @@
   </section>
 </template>
 <script>
+import moment from "moment";
 export default {
   head() {
     return {
@@ -144,19 +145,13 @@ export default {
       return str.charAt(0).toUpperCase() + str.slice(1);
     },
     timeFormat(time) {
-      // TODO: format time better
-      let hours = parseInt(time.split(":")[0]);
-      let minutes = parseInt(time.split(":")[1]);
-      let ampm = hours >= 12 ? " PM" : " AM";
-      hours = hours % 12;
-      let strTime = hours + ":" + minutes + ampm;
+      let strTime = moment(time.split(".")[0], "HH:mm:ss").format("h:mm A");
       return strTime;
     },
     dateFormat(date) {
-      // TODO: format date better
-      let d = new Date(date);
+      let d = moment(date);
 
-      return d.toDateString();
+      return d.format("LL");
     },
     async createBooking() {
       const response = await this.$axios.post("/api/bookings", {

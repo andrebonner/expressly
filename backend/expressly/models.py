@@ -16,6 +16,7 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    telephone = db.Column(db.String(20), nullable=False)
     is_admin = db.Column(db.Boolean, nullable=False)
     bookings = db.relationship('Booking', backref='user', lazy=True)
 
@@ -35,7 +36,7 @@ class User(db.Model, UserMixin):
     @classmethod
     def seed(self, fake):
         user = User(name=fake.name(), email=fake.email(), password=bcrypt.generate_password_hash(
-            "password").decode('utf-8'), is_admin=False)
+            "password").decode('utf-8'), telephone=fake.phone_number(), is_admin=False)
         db.session.add(user)
 
     def __repr__(self):

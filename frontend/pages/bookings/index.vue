@@ -1,21 +1,35 @@
 <template>
   <section>
-    <a-calendar :loading="loading">
-      <ul slot="dateCellRender" slot-scope="value" class="events">
+    <a-calendar
+      :loading="loading"
+      :disabled-date="disabledDate"
+      @select="selectedDate"
+    >
+      <ul
+        slot="dateCellRender"
+        slot-scope="value"
+        class="events"
+        @click="handleDateClick(value)"
+      >
         <li v-for="item in getListData(value)" :key="item.id">
           <a-badge :status="item.type" :text="item.content" />
         </li>
       </ul>
       <template slot="monthCellRender" slot-scope="value">
-        <div v-if="getMonthData(value)" class="notes-month">
+        <div
+          v-if="getMonthData(value)"
+          class="notes-month"
+          @click="handleMonthClick(value)"
+        >
           <section>{{ getMonthData(value) }}</section>
-          <span>Backlog number</span>
+          <span>Event(s)</span>
         </div>
       </template>
     </a-calendar>
   </section>
 </template>
 <script>
+import moment from "moment";
 export default {
   head() {
     return {
@@ -55,9 +69,9 @@ export default {
       let listData, bookingData;
       if (value.date) {
         bookingData = this.bookings.filter((item) => {
-          const dt = new Date(item.date);
-          //console.log(dt.toLocaleDateString(), value.format("M/D/YYYY"));
-          return dt.toLocaleDateString() === value.format("M/D/YYYY");
+          const dt = moment(item.date);
+          //console.log(dt.format("M/D/YYYY"), value.format("M/D/YYYY"));
+          return dt.format("M/D/YYYY") === value.format("M/D/YYYY");
         });
         listData = bookingData.map((item) => {
           return {
@@ -73,16 +87,46 @@ export default {
     },
 
     getMonthData(value) {
-      const dt = new Date();
-      console.log(value.month(), dt.getMonth() + 1);
-      if (value.month() === dt.getMonth()) {
+      const dt = moment();
+      console.log(value.month(), dt.month());
+      if (value.month() === dt.month()) {
         let monthData = this.bookings.filter((item) => {
-          const dt2 = new Date(item.date);
+          const dt2 = moment(item.date);
           console.log(dt2);
-          return dt2.getFullYear() === value.year();
+          return dt2.year() === value.year();
         });
         return monthData.length || 0;
       }
+    },
+    disabledDate(current) {
+      return current < moment().startOf("day");
+    },
+    selectedDate(value) {
+      console.log(value);
+      this.$confirm({
+        title: "Booking",
+        content: "You have selected " + value.format("LL"),
+        okText: "Book",
+        cancelText: "Cancel",
+        onOk() {
+          console.log("OK");
+          //this.$message.success("OK");
+        },
+        onCancel() {
+          console.log("Cancel");
+          //this.$message.error("Cancel");
+        },
+      });
+    },
+    handleDateClick(value) {
+      console.log(value);
+    },
+    handleMonthClick(value) {
+      console.log(value);
+      this.$notification.info({
+        message: "Booking",
+        description: "You have selected " + value.format("MMMM"),
+      });
     },
   },
 };

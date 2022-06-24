@@ -19,6 +19,7 @@ def register():
         data['password']).decode('utf-8'), is_admin=False)
     db.session.add(user)
     db.session.commit()
+    # TODO: Send email notification for newly created user
     return jsonify({'success': True, 'message': 'User created'})
 
 
@@ -42,11 +43,11 @@ def get_user(current_user):
         return jsonify({'success': False, 'message': 'User does not exist'}), 401
 
     user = {'id': current_user.id, 'email': current_user.email,
-            'name': current_user.name, 'is_admin': current_user.is_admin, 'bookings': []}
+            'name': current_user.name, 'telephone': current_user.telephone, 'is_admin': current_user.is_admin, 'bookings': []}
     for booking in current_user.bookings:
-        user['bookings'].append({'id': booking.id, 'date': booking.schedule.date, 'time': str(booking.schedule.time),
-                                 'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},
-                                 'institution': {'id': booking.schedule.institution.id, 'code': booking.schedule.institution.code, 'name': booking.schedule.institution.name, 'type': booking.schedule.institution.type, 'address': booking.schedule.institution.address, 'telephone': booking.schedule.institution.telephone, 'email': booking.schedule.institution.email}})
+        user['bookings'].append({'id': booking.id, 'schedule': {'date': booking.schedule.date, 'time': str(booking.schedule.time),
+                                                                'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},
+                                                                'institution': {'id': booking.schedule.institution.id, 'code': booking.schedule.institution.code, 'name': booking.schedule.institution.name, 'type': booking.schedule.institution.type, 'address': booking.schedule.institution.address, 'telephone': booking.schedule.institution.telephone, 'email': booking.schedule.institution.email}}})
 
     return jsonify({'success': True,  'user': user})
 
@@ -64,7 +65,7 @@ def forgot_password():
         return jsonify({'success': False, 'message': 'User does not exist'}), 401
     token = jwt.encode({'id': user.id, 'exp': datetime.datetime.utcnow(
     ) + datetime.timedelta(minutes=30)}, current_app.config['SECRET_KEY'])
-
+    # TODO: Send email with link to verify user requested a change
     return jsonify({'success': True, 'message': 'User logged in'})
 
 

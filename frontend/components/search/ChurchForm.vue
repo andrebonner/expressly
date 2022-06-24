@@ -31,7 +31,7 @@
       </a-select>
     </a-form-item>
     <a-form-item name="date">
-      <a-date-picker
+      <a-range-picker
         :disabled-date="disabledDate"
         v-decorator="[
           'date',
@@ -88,8 +88,8 @@ export default {
     },
 
     disabledDate(current) {
-      // Can not select days before today and today
-      return current && current < moment().endOf("day");
+      // Can not select days before today
+      return current < moment().startOf("day");
     },
   },
   mounted() {

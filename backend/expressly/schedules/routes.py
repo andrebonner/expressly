@@ -12,26 +12,28 @@ def index():
     type = request.args.get('type')
     area = request.args.get('area')
     institution = request.args.get('institution')
-    date = request.args.get('date')
+    date = request.args.getlist('date[]')
     sch = []
-
+    print(date)
     if area is not None and institution is not None and date is not None:
-        schedules = Schedule.query.filter_by(
-            area_code=area, institution_code=institution, date=date)
+        schedules = Schedule.query.filter(
+            Schedule.area_code == area, Schedule.institution_code == institution, Schedule.date.between(date[0], date[1])).all()
     elif area is not None and institution is not None:
         schedules = Schedule.query.filter_by(
             area_code=area, institution_code=institution)
     elif area is not None and date is not None:
-        schedules = Schedule.query.filter_by(area_code=area, date=date)
+        schedules = Schedule.query.filter(
+            Schedule.area_code == area, Schedule.date.between(date[0], date[1])).all()
     elif institution is not None and date is not None:
-        schedules = Schedule.query.filter_by(
-            institution_code=institution, date=date)
+        schedules = Schedule.query.filter(
+            Schedule.institution_code == institution, Schedule.date.between(date[0], date[1])).all()
     elif area is not None:
         schedules = Schedule.query.filter_by(area_code=area)
     elif institution is not None:
         schedules = Schedule.query.filter_by(institution_code=institution)
-    elif date is not None:
-        schedules = Schedule.query.filter_by(date=date)
+    elif len(date):
+        schedules = Schedule.query.filter(
+            Schedule.date.between(date[0], date[1])).all()
     else:
         schedules = Schedule.query.all()
 
@@ -89,6 +91,7 @@ def create_schedule(current_user, type, id):
                             date=date, time=time, space_count=space_count)
         db.session.add(schedule)
         db.session.commit()
+        # TODO: send email to institution to notify
         return jsonify({'success': True, 'message': 'schedule created'})
     else:
         return jsonify({'success': False, 'message': 'space_count must be greater than 1'})

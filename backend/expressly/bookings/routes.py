@@ -56,6 +56,7 @@ def create_booking(current_user):
         schedule.space_count -= 1
         # db.session.update(schedule)
         db.session.commit()
+        # TODO: Send email notification to user
         return jsonify({'success': True, 'message': 'Booking created'})
     else:
         return jsonify({'success': False, 'message': 'Unauthorized'})

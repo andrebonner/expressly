@@ -40,14 +40,13 @@
         },
       ]"
     >
-      <a-date-picker
+      <a-range-picker
         :disabled-date="disabledDate"
         v-decorator="[
           'date',
           {
             rules: [
               {
-                type: 'string',
                 required: true,
                 message: 'Please select date!',
               },
@@ -107,8 +106,9 @@ export default {
       });
     },
     disabledDate(current) {
-      // Can not select days before today and today
-      return current && current < moment().endOf("day");
+      //TODO: Can not select days from schedules in backend
+      // Can not select days before today
+      return current < moment().startOf("day");
     },
   },
 };

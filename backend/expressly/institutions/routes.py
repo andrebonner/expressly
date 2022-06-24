@@ -12,8 +12,13 @@ def index():
     insts = []
     for institution in institutions:
         i = {
+            'id': institution.id,
             'code': institution.code,
             'name': institution.name,
+            'type': institution.type,
+            'telephone': institution.telephone,
+            'email': institution.email,
+            'address': institution.address,
             'areas': []
         }
         for area in institution.areas:
@@ -28,7 +33,11 @@ def show(type):
     insts = []
     for institution in institutions:
         if next((i for i in insts if i['code'] == institution.code), None) is None:
-            i = {'code': institution.code, 'name': institution.name}
+            i = {'id': institution.id, 'code': institution.code,
+                 'name': institution.name, 'type': institution.type,
+                 'telephone': institution.telephone,
+                 'email': institution.email,
+                 'address': institution.address, }
             insts.append(i)
     return jsonify(insts)
 
@@ -55,6 +64,7 @@ def show_by_code(type, code):
     aes = []
     for area in areas:
         a = {
+            'id': area.id,
             'code': area.code,
             'name': area.name,
             'institutions': []

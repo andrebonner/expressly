@@ -18,12 +18,12 @@ def get_users(current_user):
     users = User.query.all()
     us = []
     for user in users:
-        u = {'id': user.id, 'email': user.email,
+        u = {'id': user.id, 'email': user.email, 'telephone': user.telephone,
              'name': user.name, 'is_admin': user.is_admin, 'bookings': []}
         for booking in user.bookings:
-            u['bookings'].append({'id': booking.id, 'date': booking.schedule.date, 'time': str(booking.schedule.time),
-                                  'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},
-                                  'institution': {'id': booking.schedule.institution.id, 'code': booking.schedule.institution.code, 'name': booking.schedule.institution.name, 'type': booking.schedule.institution.type, 'address': booking.schedule.institution.address, 'telephone': booking.schedule.institution.telephone, 'email': booking.schedule.institution.email}})
+            u['bookings'].append({'id': booking.id, 'schedule': {'date': booking.schedule.date, 'time': str(booking.schedule.time),
+                                                                 'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},
+                                                                 'institution': {'id': booking.schedule.institution.id, 'code': booking.schedule.institution.code, 'name': booking.schedule.institution.name, 'type': booking.schedule.institution.type, 'address': booking.schedule.institution.address, 'telephone': booking.schedule.institution.telephone, 'email': booking.schedule.institution.email}}})
         us.append(u)
     return jsonify(us)
 
@@ -38,12 +38,12 @@ def get_user(current_user, id):
     if user is None:
         return jsonify({'success': False, 'message': 'User does not exist'}), 401
 
-    u = {'id': user.id, 'email': user.email, 'name': user.name,
+    u = {'id': user.id, 'email': user.email, 'name': user.name, 'telephone': user.telephone,
          'is_admin': user.is_admin, 'bookings': []}
     for booking in user.bookings:
-        u['bookings'].append({'id': booking.id, 'date': booking.schedule.date, 'time': str(booking.schedule.time),
-                              'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},
-                              'institution': {'id': booking.schedule.institution.id, 'code': booking.schedule.institution.code, 'name': booking.schedule.institution.name, 'type': booking.schedule.institution.type, 'address': booking.schedule.institution.address, 'telephone': booking.schedule.institution.telephone, 'email': booking.schedule.institution.email}})
+        u['bookings'].append({'id': booking.id, 'schedule': {'date': booking.schedule.date, 'time': str(booking.schedule.time),
+                                                             'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},
+                                                             'institution': {'id': booking.schedule.institution.id, 'code': booking.schedule.institution.code, 'name': booking.schedule.institution.name, 'type': booking.schedule.institution.type, 'address': booking.schedule.institution.address, 'telephone': booking.schedule.institution.telephone, 'email': booking.schedule.institution.email}}})
     return jsonify(u)
 
 
