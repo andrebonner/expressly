@@ -1,4 +1,6 @@
 export const state = () => ({
+  areas: [],
+  institutions: [],
   user: null,
   token: null,
   error: null,
@@ -6,6 +8,8 @@ export const state = () => ({
 });
 
 export const getter = {
+  areas: (state) => state.areas,
+  institutions: (state) => state.institutions,
   user: (state) => state.user,
   token: (state) => state.token,
   error: (state) => state.error,
@@ -13,6 +17,12 @@ export const getter = {
 };
 
 export const mutations = {
+  setAreas(state, areas) {
+    state.areas = areas;
+  },
+  setInstitutions(state, institutions) {
+    state.institutions = institutions;
+  },
   setUser(state, user) {
     state.user = user;
   },
