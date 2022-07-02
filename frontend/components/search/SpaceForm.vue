@@ -106,7 +106,6 @@ export default {
       });
     },
     disabledDate(current) {
-      //TODO: Can not select days from schedules in backend
       // Can not select days before today
       return current < moment().startOf("day");
     },

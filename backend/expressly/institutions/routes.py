@@ -55,9 +55,9 @@ def create(current_user):
     return jsonify({'success': True, 'message': 'institution created'})
 
 
-@institutions.route('/institutions/<type>/<code>', methods=['GET'])
+@institutions.route('/institutions/<code>', methods=['GET'])
 def show_by_code(type, code):
-    institution = Institution.query.filter_by(type=type, code=code).first()
+    institution = Institution.query.filter_by(code=code).first()
     if institution is None:
         return jsonify({'error': 'institution not found'})
     areas = institution.areas
@@ -76,13 +76,13 @@ def show_by_code(type, code):
     return jsonify(aes)
 
 
-@institutions.route('/institutions/<type>/<code>', methods=['PUT'])
+@institutions.route('/institutions/<code>', methods=['PUT'])
 @token_required
-def update(current_user, type, code):
+def update(current_user,  code):
     if not current_user.is_admin:
         return jsonify({'error': 'permission denied'})
     data = request.get_json()
-    institution = Institution.query.filter_by(type=type, code=code).first()
+    institution = Institution.query.filter_by(code=code).first()
     if institution is None:
         return jsonify({'error': 'institution not found'})
     institution.name = data['name']
@@ -93,12 +93,12 @@ def update(current_user, type, code):
     return jsonify({'success': True, 'message': 'institution updated'})
 
 
-@institutions.route('/institutions/<type>/<code>', methods=['DELETE'])
+@institutions.route('/institutions/<code>', methods=['DELETE'])
 @token_required
-def delete(current_user, type, code):
+def delete(current_user,  code):
     if not current_user.is_admin:
         return jsonify({'error': 'permission denied'})
-    institution = Institution.query.filter_by(type=type, code=code).first()
+    institution = Institution.query.filter_by(code=code).first()
     if institution is None:
         return jsonify({'error': 'institution not found'})
     db.session.delete(institution)

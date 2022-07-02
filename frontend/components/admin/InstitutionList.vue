@@ -20,7 +20,7 @@
           title="Are you sure you want to delete this Institution?"
           ok-text="Yes"
           cancel-text="No"
-          @confirm="confirmInstDelete(item)"
+          @confirm="confirmInstitutionDelete(item)"
           @cancel="cancelDelete"
           slot="actions"
           ><a href="#">Delete</a></a-popconfirm
@@ -43,6 +43,7 @@
             <a-form-item label="Code">
               <a-input
                 placeholder="Code"
+                :disabled="institution.id > 0"
                 v-decorator="[
                   'code',
                   {
@@ -175,6 +176,7 @@ export default {
       this.institutionLoading = true;
       await this.$axios.get("/api/institutions").then((res) => {
         this.institutions = res.data;
+        this.$store.commit("setInstitutions", this.institutions);
         this.institutionLoading = false;
       });
     },
@@ -182,25 +184,40 @@ export default {
     async createInstitution(form) {
       this.InstitutionLoading = true;
       await this.$axios.post("/api/institutions", form).then((res) => {
-        this.institutionLoading = false;
-        this.institutionModal = false;
+        if (res.data.success) {
+          this.$message.success("Institution created successfully!");
+          this.getInstitutions();
+          this.institutionModal = false;
+        } else {
+          this.$message.error(res.data.message);
+        }
+        this.InstitutionLoading = false;
       });
     },
-    async updateInstitution(form, id) {
+    async updateInstitution(form, code) {
       this.institutionLoading = true;
-      await this.$axios.put("/api/institutions/" + id, form).then((res) => {
+      await this.$axios.put("/api/institutions/" + code, form).then((res) => {
+        if (res.data.success) {
+          this.$message.success("Institution updated successfully!");
+          this.getInstitutions();
+          this.institutionModal = false;
+        } else {
+          this.$message.error(res.data.message);
+        }
         this.institutionLoading = false;
-        this.institutionModal = false;
       });
     },
     async deleteInstitution(record) {
-      await this.$axios.delete("/api/institutions/" + record.id).then((res) => {
-        this.getInstitutions();
-        this.$message({
-          message: "Institution Deleted!",
-          type: "success",
+      await this.$axios
+        .delete("/api/institutions/" + record.code)
+        .then((res) => {
+          if (res.data.success) {
+            this.$message.success("Deleted successfully!");
+            this.getInstitutions();
+          } else {
+            this.$message.error(res.data.message);
+          }
         });
-      });
     },
 
     showInstModal(record = null) {
@@ -234,7 +251,7 @@ export default {
         if (!err) {
           console.log(values);
           if (this.institution.id) {
-            this.updateInstitution(values, this.institution.id);
+            this.updateInstitution(values, this.institution.code);
           } else {
             this.createInstitution(values);
           }

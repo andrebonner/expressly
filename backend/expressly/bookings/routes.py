@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from expressly.models import Booking, Schedule
-from expressly.utils import token_required
+from expressly.utils import token_required, send_email
 from expressly.extensions import db
 
 
@@ -56,8 +56,11 @@ def create_booking(current_user):
         schedule.space_count -= 1
         # db.session.update(schedule)
         db.session.commit()
-        # TODO: Send email notification to user
-        return jsonify({'success': True, 'message': 'Booking created'})
+        # Send email notification to user
+        if send_email([current_user.email], 'Booking Confirmation', f'''Your booking has been confirmed for {schedule.institution.name} on the {schedule.date.strftime("%B %d, %Y")} at {schedule.time.strftime("%I:%M %p")} \n\n You may contact the institution at {schedule.institution.telephone} or email {schedule.institution.email}'''):
+            return jsonify({'success': True, 'message': 'Booking created'})
+        else:
+            return jsonify({'success': True, 'message': 'Booking created, but email failed to send'})
     else:
         return jsonify({'success': False, 'message': 'Unauthorized'})
 

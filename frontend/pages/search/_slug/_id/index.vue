@@ -25,7 +25,7 @@
             {{ schedule.institution ? schedule.institution.telephone : "" }}
           </a-descriptions-item>
           <a-descriptions-item label="Location">
-            {{ schedule.area }}
+            {{ schedule.area ? schedule.area.name : "" }}
           </a-descriptions-item>
 
           <a-descriptions-item label="Address">

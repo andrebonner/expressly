@@ -41,9 +41,27 @@
     >
       <a-form :form="scheduleForm"
         ><a-row :gutter="5">
-          <a-col :span="12">
+          <a-col :span="8">
+            <a-form-item label="Type">
+              <a-select
+                v-decorator="[
+                  'type',
+                  {
+                    initialValue: schedule.type,
+                    rules: [{ required: true, message: 'Please select type!' }],
+                  },
+                ]"
+                @change="handleTypeChange"
+                ><a-select-option value="church">Church</a-select-option>
+                <a-select-option value="space">Space</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="8">
             <a-form-item label="Date">
               <a-date-picker
+                format="YYYY-MM-DD"
+                valueFormat="YYYY-MM-DD"
                 v-decorator="[
                   'date',
                   {
@@ -53,9 +71,12 @@
                 ]"
               ></a-date-picker> </a-form-item
           ></a-col>
-          <a-col :span="12">
+          <a-col :span="8">
             <a-form-item label="Time">
               <a-time-picker
+                :use12-hours="true"
+                format="h:mm A"
+                valueFormat="HH:mm"
                 v-decorator="[
                   'time',
                   {
@@ -78,13 +99,12 @@
               },
             ]"
           >
-            <a-option
+            <a-select-option
               v-for="institution in institutions"
-              :value="institution.id"
               :key="institution.id"
             >
-              {{ institution.code + " " + institution.name }}
-            </a-option>
+              {{ institution.code + " : " + institution.name }}
+            </a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item label="Area">
@@ -97,10 +117,23 @@
               },
             ]"
           >
-            <a-option v-for="area in areas" :value="area.id" :key="area.id">
-              {{ area.code + " " + area.name }}
-            </a-option>
+            <a-select-option v-for="area in areas" :key="area.id">
+              {{ area.code + " : " + area.name }}
+            </a-select-option>
           </a-select>
+        </a-form-item>
+        <a-form-item label="Space Count">
+          <a-input-number
+            v-decorator="[
+              'space_count',
+              {
+                initialValue: schedule.space_count,
+                rules: [
+                  { required: true, message: 'Please enter space count!' },
+                ],
+              },
+            ]"
+          ></a-input-number>
         </a-form-item>
       </a-form>
       <template slot="footer">
@@ -117,7 +150,16 @@
   </a-card>
 </template>
 <script>
+import moment from "moment";
 export default {
+  computed: {
+    institutions() {
+      return this.$store.state.institutions;
+    },
+    areas() {
+      return this.$store.state.areas;
+    },
+  },
   data() {
     return {
       scheduleModal: false,
@@ -128,9 +170,10 @@ export default {
         institution_id: null,
         date: null,
         time: null,
+        type: null,
+        space_count: 10,
       },
-      areas: [],
-      institutions: [],
+
       schedules: [],
       pagination: {
         onChange: (page) => {
@@ -148,59 +191,106 @@ export default {
         this.scheduleLoading = false;
       });
     },
-    async createSchedule(form) {
+    async createSchedule(form, type) {
       this.scheduleLoading = true;
-      await this.$axios.post("/api/schedules", form).then((res) => {
+      await this.$axios.post("/api/schedules/" + type, form).then((res) => {
+        if (res.data.success) {
+          this.$message.success("Schedule created successfully!");
+          this.getSchedules();
+          this.scheduleModal = false;
+        } else {
+          this.$message.error(res.data.message);
+        }
         this.scheduleLoading = false;
-        this.scheduleModal = false;
       });
     },
-    async updateSchedule(form, id) {
+    async updateSchedule(form, type, id) {
       this.scheduleLoading = true;
-      await this.$axios.put("/api/schedules/" + id, form).then((res) => {
-        this.scheduleLoading = false;
-        this.scheduleModal = false;
-      });
+      await this.$axios
+        .put("/api/schedules/" + type + "/" + id, form)
+        .then((res) => {
+          if (res.data.success) {
+            this.$message.success("Schedule updated successfully!");
+            this.getSchedules();
+            this.scheduleModal = false;
+          } else {
+            this.$message.error(res.data.message);
+          }
+          this.scheduleLoading = false;
+        });
     },
     async deleteSchedule(record) {
-      await this.$axios.delete("/api/schedules/" + record.id).then((res) => {
-        this.getSchedules();
-        this.$message({
-          message: "Schedule Deleted!",
-          type: "success",
+      console.log(record);
+      await this.$axios
+        .delete("/api/schedules/" + record.institution.type + "/" + record.id)
+        .then((res) => {
+          this.getSchedules();
+          this.$message({
+            message: "Schedule Deleted!",
+            type: "success",
+          });
         });
-      });
     },
 
     showScheduleModal(record = null) {
       if (record) {
-        this.schedule = record;
-        this.scheduleForm.setFieldsValue(record);
+        this.schedule = {
+          id: record.id,
+          area_id: record.area.id,
+          institution_id: record.institution.id,
+          date: this.dateFormat(record.date),
+          time: this.timeFormat(record.time),
+          type: record.institution.type,
+          space_count: record.space_count,
+        };
+        this.scheduleForm.setFieldsValue({
+          area_id: record.area.id,
+          institution_id: record.institution.id,
+          date: this.dateFormat(record.date),
+          time: this.timeFormat(record.time),
+          type: record.institution.type,
+          space_count: record.space_count,
+        });
       } else {
         this.schedule = {
           id: null,
-          code: "",
-          name: "",
-          type: "",
-          address: "",
-          telephone: "",
-          email: "",
+          area_id: null,
+          institution_id: null,
+          date: null,
+          time: null,
+          type: null,
+          space_count: 10,
         };
         this.scheduleForm.resetFields();
       }
+      console.log(this.schedule, record);
       this.scheduleModal = true;
     },
     handleScheduleClick() {
       this.scheduleForm.validateFields((err, values) => {
         if (!err) {
-          console.log(values);
+          console.log(values, this.schedule);
           if (this.schedule.id) {
-            this.updateSchedule(values, this.schedule.id);
+            this.updateSchedule(values, values.type, this.schedule.id);
           } else {
-            this.createSchedule(values);
+            this.createSchedule(values, values.type);
           }
         }
       });
+    },
+    handleTypeChange(value) {
+      const type = value;
+      if (type) {
+        debugger;
+        this.areas = this.areas.filter((area) => {
+          return area.institutions[0]?.type == type;
+        });
+        this.institutions = this.institutions.filter((institution) => {
+          return institution.type == type;
+        });
+      }
+
+      console.log(type, this.areas, this.institutions);
     },
     confirmScheduleDelete(record) {
       this.deleteSchedule(record);
@@ -208,6 +298,12 @@ export default {
     cancelDelete(e) {
       console.log(e);
       this.$message.info("Delete canceled");
+    },
+    dateFormat(date) {
+      return moment(date).format("YYYY-MM-DD");
+    },
+    timeFormat(time) {
+      return moment(time.split(".")[0], "HH:mm:ss").format("HH:mm A");
     },
   },
   beforeCreate() {

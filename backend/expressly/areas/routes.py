@@ -20,7 +20,7 @@ def index():
         }
         for institution in area.institutions:
             a['institutions'].append(
-                {'code': institution.code, 'name': institution.name})
+                {'code': institution.code, 'name': institution.name, 'type': institution.type})
         aes.append(a)
     return jsonify(aes)
 
@@ -78,7 +78,7 @@ def update(current_user, code):
     data = request.get_json()
     area = Area.query.filter_by(code=code).first()
     if area is None:
-        return jsonify({'error': 'area not found'})
+        return jsonify({'success': False, 'message': 'area not found'})
     area.name = data['name']
     db.session.commit()
     return jsonify({'success': True, 'message': 'area updated'})
@@ -87,11 +87,11 @@ def update(current_user, code):
 @areas.route('/areas/<code>', methods=['DELETE'])
 @token_required
 def delete(current_user, code):
-    if not current_user.admin:
+    if not current_user.is_admin:
         return jsonify({'success': False, 'message': 'permission denied'})
     area = Area.query.filter_by(code=code).first()
     if area is None:
-        return jsonify({'error': 'area not found'})
+        return jsonify({'success': False, 'message': 'area not found'})
     db.session.delete(area)
     db.session.commit()
     return jsonify({'success': True, 'message': 'area deleted'})

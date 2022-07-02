@@ -108,6 +108,7 @@ export default {
       this.areaLoading = true;
       await this.$axios.get("/api/areas").then((res) => {
         this.areas = res.data;
+        this.$store.commit("setAreas", this.areas);
         this.areaLoading = false;
       });
     },
@@ -115,27 +116,39 @@ export default {
     async createArea(form) {
       this.areaLoading = true;
       await this.$axios.post("/api/areas", form).then((res) => {
+        if (res.data.success) {
+          this.$message.success("Area created successfully!");
+          this.getAreas();
+          this.areaModal = false;
+        } else {
+          this.$message.error(res.data.message);
+        }
         this.areaLoading = false;
-        this.areaModal = false;
       });
     },
-    async updateArea(form, id) {
+    async updateArea(form, code) {
       this.areaLoading = true;
-      await this.$axios.put("/api/areas/" + id, form).then((res) => {
+      await this.$axios.put("/api/areas/" + code, form).then((res) => {
+        if (res.data.success) {
+          this.$message.success("Area updated successfully!");
+          this.getAreas();
+          this.areaModal = false;
+        } else {
+          this.$message.error(res.data.message);
+        }
         this.areaLoading = false;
-        this.areaModal = false;
       });
     },
     async deleteArea(record) {
-      await this.$axios.delete("/api/areas/" + record.id).then((res) => {
-        this.getAreas();
-        this.$message({
-          message: "Area Deleted!",
-          type: "success",
-        });
+      await this.$axios.delete("/api/areas/" + record.code).then((res) => {
+        if (res.data.success) {
+          this.$message.success("Area deleted successfully!");
+          this.getAreas();
+        } else {
+          this.$message.error(res.data.message);
+        }
       });
     },
-
     showAreaModal(record = null) {
       this.areaModal = true;
       if (record) {
@@ -160,7 +173,7 @@ export default {
         if (!err) {
           console.log(values);
           if (this.area.id) {
-            this.updateArea(values, this.area.id);
+            this.updateArea(values, this.area.code);
           } else {
             this.createArea(values);
           }

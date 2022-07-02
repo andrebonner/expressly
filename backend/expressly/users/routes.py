@@ -1,6 +1,8 @@
 import datetime
+from random import random
+import string
 from flask import Blueprint, jsonify, request, current_app
-from expressly.utils import token_required
+from expressly.utils import send_email, token_required, generate_random_password
 import jwt
 from expressly.extensions import bcrypt, db
 from expressly.models import User
@@ -54,16 +56,24 @@ def create_user(current_user):
         return jsonify({'success': False, 'message': 'User does not exist'}), 401
     data = request.get_json()
     if data is None:
-        return jsonify({'success': False, 'message': 'No data provided'}), 400
-    if 'email' not in data or 'name' not in data or 'password' not in data:
-        return jsonify({'success': False, 'message': 'Missing data'}), 400
+        return jsonify({'success': False, 'message': 'No data provided'})
+    if 'email' not in data or 'name' not in data:
+        return jsonify({'success': False, 'message': 'Missing data'})
     if User.query.filter_by(email=data['email']).first() is not None:
-        return jsonify({'success': False, 'message': 'User already exists'}), 400
+        return jsonify({'success': False, 'message': 'User already exists'})
+    password = generate_random_password()
+    print(password)
     user = User(email=data['email'], name=data['name'], password=bcrypt.generate_password_hash(
-        data['password']).decode('utf-8'), is_admin=False)
+        password).decode('utf-8'), telephone=data['telephone'], is_admin=False)
     db.session.add(user)
     db.session.commit()
-    return jsonify({'success': True, 'message': 'User created'})
+
+    # send email with password
+    if send_email([user.email], 'Welcome to Expressly',
+                  f'''Welcome to Expressly! \n\nusername: {user.email} \npassword : {password}'''):
+        return jsonify({'success': True, 'message': 'User created'})
+    else:
+        return jsonify({'success': True, 'message': 'User created, Error sending email'})
 
 
 @users.route('/users/<int:id>', methods=['PUT'])
@@ -81,6 +91,10 @@ def update_user(current_user, id):
         return jsonify({'success': False, 'message': 'User does not exist'}), 401
     user.email = data['email']
     user.name = data['name']
+    if 'telephone' in data:
+        user.telephone = data['telephone']
+    if 'is_admin' in data:
+        user.is_admin = data['is_admin']
     db.session.commit()
     return jsonify({'success': True, 'message': 'User updated'})
 
@@ -92,7 +106,7 @@ def delete_user(current_user, id):
         return jsonify({'success': False, 'message': 'User does not exist'}), 401
     user = User.query.filter_by(id=id).first()
     if user is None:
-        return jsonify({'success': False, 'message': 'User does not exist'}), 401
+        return jsonify({'success': False, 'message': 'User does not exist'})
     db.session.delete(user)
     db.session.commit()
     return jsonify({'success': True, 'message': 'User deleted'})

@@ -73,6 +73,16 @@
             ]"
           ></a-input>
         </a-form-item>
+        <a-form-item label="Admin" v-if="user.id == 0">
+          <a-switch
+            v-decorator="[
+              'is_admin',
+              {
+                initialValue: user.is_admin,
+              },
+            ]"
+          ></a-switch>
+        </a-form-item>
       </a-form>
       <template slot="footer">
         <a-button
@@ -98,6 +108,7 @@ export default {
         name: null,
         email: null,
         telephone: null,
+        is_admin: false,
       },
       users: [],
       pagination: {
@@ -119,15 +130,27 @@ export default {
     async createUser(form) {
       this.userLoading = true;
       await this.$axios.post("/api/users", form).then((res) => {
+        if (res.data.success) {
+          this.$message.success(res.data.message);
+          this.userModal = false;
+          this.getUsers();
+        } else {
+          this.$message.error(res.data.message);
+        }
         this.userLoading = false;
-        this.userModal = false;
       });
     },
     async updateUser(form, id) {
       this.userLoading = true;
       await this.$axios.put("/api/users/" + id, form).then((res) => {
+        if (res.data.success) {
+          this.$message.success(res.data.message);
+          this.userModal = false;
+          this.getUsers();
+        } else {
+          this.$message.error(res.data.message);
+        }
         this.userLoading = false;
-        this.userModal = false;
       });
     },
     async deleteUser(record) {
@@ -149,6 +172,7 @@ export default {
           name: null,
           email: null,
           telephone: null,
+          is_admin: false,
         };
         this.userForm.resetFields();
       }

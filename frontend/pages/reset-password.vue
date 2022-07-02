@@ -2,33 +2,18 @@
   <section>
     <a-card :style="{ width: '450px', margin: ' 10px auto', padding: '10px' }">
       <a-form
-        id="expressly-register"
+        id="expressly-reset-password"
         :form="form"
-        class="register-form"
+        class="reset-password-form"
         @submit="handleSubmit"
       >
         <a-form-item>
           <a-input
-            v-decorator="[
-              'name',
-              {
-                rules: [{ required: true, message: 'Please input your name!' }],
-              },
-            ]"
-            placeholder="Name"
-          >
-            <a-icon
-              slot="prefix"
-              type="user"
-              style="color: rgba(0, 0, 0, 0.25)"
-            />
-          </a-input>
-        </a-form-item>
-        <a-form-item>
-          <a-input
+            :disabled="user.id ? true : false"
             v-decorator="[
               'email',
               {
+                initialValue: user.email,
                 rules: [
                   {
                     type: 'email',
@@ -101,37 +86,37 @@
           <a-button
             type="primary"
             html-type="submit"
-            class="register-form-button"
+            class="reset-password-form-button"
             :loading="loading"
           >
-            Register
+            Reset Password
           </a-button>
-          Or
-          <nuxt-link to="/login"> login now! </nuxt-link>
         </a-form-item>
       </a-form></a-card
     >
   </section>
 </template>
-
 <script>
 export default {
   head() {
     return {
-      titleTemplate: "%s - Register",
+      titleTemplate: "%s - Reset Password",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { hid: "description", name: "description", content: "Register" },
+        { hid: "description", name: "description", content: "Reset Password" },
       ],
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
     };
   },
   data() {
-    return { loading: false };
+    return { loading: false, user: {} };
   },
   beforeCreate() {
-    this.form = this.$form.createForm(this, { name: "normal_register" });
+    this.form = this.$form.createForm(this, { name: "normal_reset_password" });
+  },
+  mounted() {
+    this.getUser();
   },
   methods: {
     handleSubmit(e) {
@@ -139,7 +124,7 @@ export default {
       this.form.validateFieldsAndScroll((err, values) => {
         if (!err) {
           console.log("Received values of form: ", values);
-          this.register(values);
+          this.resetPassword(values);
         }
         console.log(err);
       });
@@ -163,22 +148,49 @@ export default {
       }
       callback();
     },
-    async register(form) {
+    async getUser() {
+      try {
+        const token = this.$route.query.token;
+        if (token) {
+          console.log(token);
+          await this.$axios
+            .get(`/api/auth/reset_password`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((res) => {
+              if (res.data.success) {
+                this.user = res.data.user;
+                this.form.setFieldsValue({
+                  email: this.user.email,
+                });
+              }
+            });
+        }
+      } catch (e) {
+        console.log(e);
+        this.$message.error(e.message);
+      }
+    },
+    async resetPassword(form) {
       try {
         this.loading = true;
-        await this.$axios.post("/api/auth/register", form).then(async (res) => {
-          if (res.data.success) {
-            this.$message.success(res.data.message);
-            await this.$auth.loginWith("local", {
-              data: {
-                username: form.email,
-                password: form.password,
-              },
-            });
-          } else {
-            this.$message.error(data.message);
-          }
-        });
+        await this.$axios
+          .post("/api/auth/reset_password", form)
+          .then(async (res) => {
+            if (res.data.success) {
+              this.$message.success(res.data.message);
+              await this.$auth.loginWith("local", {
+                data: {
+                  username: form.email,
+                  password: form.password,
+                },
+              });
+            } else {
+              this.$message.error(data.message);
+            }
+          });
       } catch (e) {
         console.log(e);
         this.$message.error(e.message);
@@ -189,14 +201,15 @@ export default {
   },
 };
 </script>
+
 <style>
-#expressly-register .register-form {
+#expressly-reset-password .reset-password-form {
   max-width: 300px;
 }
-#expressly-register .register-form-forgot {
+#expressly-reset-password .reset-password-form-forgot {
   float: right;
 }
-#expressly-register .register-form-button {
+#expressly-reset-password .reset-password-form-button {
   width: 100%;
 }
 </style>

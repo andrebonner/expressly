@@ -16,7 +16,7 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    telephone = db.Column(db.String(20), nullable=False)
+    telephone = db.Column(db.String(20), nullable=True)
     is_admin = db.Column(db.Boolean, nullable=False)
     bookings = db.relationship('Booking', backref='user', lazy=True)
 
