@@ -47,10 +47,12 @@
                 initialValue: area.code,
                 rules: [
                   { required: true, message: 'Please input code!' },
-                  {
-                    pattern: /^[A-Z|a-z]{4}$/,
-                    message: 'Please input valid code!',
-                  },
+                  area.id > 0
+                    ? {}
+                    : {
+                        pattern: /^[A-Z|a-z]{4}$/,
+                        message: 'Please input valid code!',
+                      },
                 ],
               },
             ]"
@@ -67,7 +69,40 @@
               },
             ]"
             autocomplete="off"
-          ></a-input>
+          ></a-input> </a-form-item
+        ><a-form-item label="Type" v-if="area.id > 0">
+          <a-select
+            v-decorator="[
+              'type',
+              {
+                initialValue: area.type,
+                rules: [{ required: false, message: 'Please select type!' }],
+              },
+            ]"
+            @change="handleTypeChange"
+            ><a-select-option value="church">Church</a-select-option>
+            <a-select-option value="space">Space</a-select-option>
+          </a-select> </a-form-item
+        ><a-form-item label="Institution" v-if="area.id > 0">
+          <a-select
+            mode="multiple"
+            v-decorator="[
+              'institution_ids',
+              {
+                initialValue: area.institution_ids,
+                rules: [
+                  { required: false, message: 'Please select institution!' },
+                ],
+              },
+            ]"
+          >
+            <a-select-option
+              v-for="institution in institutions"
+              :key="institution.id"
+            >
+              {{ institution.code + " : " + institution.name }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
       </a-form>
       <template slot="footer">
@@ -92,9 +127,12 @@ export default {
         id: null,
         code: "",
         name: "",
+        type: "church",
+        institution_ids: [],
       },
       areaLoading: false,
       areas: [],
+      institutions: [],
       pagination: {
         onChange: (page) => {
           console.log(page);
@@ -152,16 +190,32 @@ export default {
     showAreaModal(record = null) {
       this.areaModal = true;
       if (record) {
-        this.area = record;
+        const type = this.getType(record);
+        const inst_ids = record.institutions.map((inst) => {
+          return inst.id;
+        });
+        console.log(inst_ids);
+        this.area = {
+          id: record.id,
+          code: record.code,
+          name: record.name,
+          type: type,
+          institution_ids: inst_ids,
+        };
         this.areaForm.setFieldsValue({
           code: record.code,
           name: record.name,
+          type: type,
+          institution_ids: inst_ids,
         });
+        this.handleTypeChange(type);
       } else {
         this.area = {
           id: null,
           code: "",
           name: "",
+          type: "church",
+          institution_ids: [],
         };
         this.areaForm.resetFields();
       }
@@ -180,13 +234,25 @@ export default {
         }
       });
     },
-
+    handleTypeChange(value) {
+      const type = value;
+      if (type) {
+        this.institutions = this.$store.state.institutions.filter(
+          (institution) => {
+            return institution.type == type;
+          }
+        );
+      }
+    },
     confirmAreaDelete(record) {
       this.deleteArea(record);
     },
     cancelDelete(e) {
       console.log(e);
       this.$message.info("Delete canceled");
+    },
+    getType(record) {
+      return record?.institutions ? record.institutions[0]?.type : "";
     },
   },
   beforeCreate() {

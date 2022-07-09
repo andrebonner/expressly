@@ -47,7 +47,7 @@
           {
             rules: [
               {
-                required: true,
+                required: false,
                 message: 'Please select date!',
               },
             ],

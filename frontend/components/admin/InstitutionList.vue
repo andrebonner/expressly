@@ -50,10 +50,12 @@
                     initialValue: institution.code,
                     rules: [
                       { required: true, message: 'Please input code!' },
-                      {
-                        pattern: /^[A-Z|a-z]{4}$/,
-                        message: 'Please input valid code!',
-                      },
+                      institution.id > 0
+                        ? {}
+                        : {
+                            pattern: /^[A-Z|a-z]{4}$/,
+                            message: 'Please input valid code!',
+                          },
                     ],
                   },
                 ]"

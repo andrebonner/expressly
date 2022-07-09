@@ -36,7 +36,7 @@
         v-decorator="[
           'date',
           {
-            rules: [{ required: true, message: 'Please select date!' }],
+            rules: [{ required: false, message: 'Please select date!' }],
           },
         ]"
         value-format="YYYY-MM-DD"

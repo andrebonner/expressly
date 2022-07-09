@@ -152,14 +152,14 @@
 <script>
 import moment from "moment";
 export default {
-  computed: {
-    institutions() {
-      return this.$store.state.institutions;
-    },
-    areas() {
-      return this.$store.state.areas;
-    },
-  },
+  // computed: {
+  //   institutions() {
+  //     return this.$store.state.institutions;
+  //   },
+  //   areas() {
+  //     return this.$store.state.areas;
+  //   },
+  // },
   data() {
     return {
       scheduleModal: false,
@@ -173,7 +173,8 @@ export default {
         type: null,
         space_count: 10,
       },
-
+      areas: [],
+      institutions: [],
       schedules: [],
       pagination: {
         onChange: (page) => {
@@ -251,6 +252,7 @@ export default {
           type: record.institution.type,
           space_count: record.space_count,
         });
+        this.handleTypeChange(record.institution.type);
       } else {
         this.schedule = {
           id: null,
@@ -281,13 +283,14 @@ export default {
     handleTypeChange(value) {
       const type = value;
       if (type) {
-        debugger;
-        this.areas = this.areas.filter((area) => {
+        this.areas = this.$store.state.areas.filter((area) => {
           return area.institutions[0]?.type == type;
         });
-        this.institutions = this.institutions.filter((institution) => {
-          return institution.type == type;
-        });
+        this.institutions = this.$store.state.institutions.filter(
+          (institution) => {
+            return institution.type == type;
+          }
+        );
       }
 
       console.log(type, this.areas, this.institutions);

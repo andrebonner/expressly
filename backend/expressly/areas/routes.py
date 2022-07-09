@@ -20,7 +20,7 @@ def index():
         }
         for institution in area.institutions:
             a['institutions'].append(
-                {'code': institution.code, 'name': institution.name, 'type': institution.type})
+                {'id': institution.id, 'code': institution.code, 'name': institution.name, 'type': institution.type})
         aes.append(a)
     return jsonify(aes)
 
@@ -53,7 +53,7 @@ def show_by_code(type, code):
         }
         for institution in area.institutions:
             a['institutions'].append(
-                {'code': institution.code, 'name': institution.name})
+                {'id': institution.id, 'code': institution.code, 'name': institution.name})
         aes.append(a)
     return jsonify(aes)
 
@@ -80,6 +80,12 @@ def update(current_user, code):
     if area is None:
         return jsonify({'success': False, 'message': 'area not found'})
     area.name = data['name']
+    if 'institution_ids' in data:
+        area.institutions = []
+        for institution_id in data['institution_ids']:
+            inst = Institution.query.filter_by(id=institution_id).first()
+            if inst is not None:
+                area.institutions.append(inst)
     db.session.commit()
     return jsonify({'success': True, 'message': 'area updated'})
 

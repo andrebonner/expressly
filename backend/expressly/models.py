@@ -18,7 +18,8 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255), nullable=False)
     telephone = db.Column(db.String(20), nullable=True)
     is_admin = db.Column(db.Boolean, nullable=False)
-    bookings = db.relationship('Booking', backref='user', lazy=True)
+    bookings = db.relationship(
+        'Booking', backref='user', lazy=True, cascade='all')
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -45,9 +46,9 @@ class User(db.Model, UserMixin):
 
 inst_areas = db.Table('inst_areas',
                       db.Column("institution_id", db.Integer, db.ForeignKey(
-                          "institutions.id")),
+                          "institutions.id", ondelete="SET NULL")),
                       db.Column("area_id", db.Integer, db.ForeignKey(
-                          "areas.id"))
+                          "areas.id", ondelete="SET NULL"))
                       )
 
 
@@ -57,8 +58,9 @@ class Area(db.Model):
     code = db.Column(db.String(50), nullable=False, unique=True)
     name = db.Column(db.String(100), nullable=False)
     institutions = db.relationship(
-        'Institution', secondary=inst_areas, backref='areas', lazy=True)
-    schedules = db.relationship('Schedule', backref='area', lazy=True)
+        'Institution', secondary=inst_areas, backref='areas', lazy=True, cascade='all')
+    schedules = db.relationship(
+        'Schedule', backref='area', lazy=True, cascade='all')
 
     @classmethod
     def seed(self, fake):
@@ -84,7 +86,8 @@ class Institution(db.Model):
     telephone = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(255), nullable=False)
     type = db.Column(db.String(50), nullable=False)
-    schedules = db.relationship('Schedule', backref='institution', lazy=True)
+    schedules = db.relationship(
+        'Schedule', backref='institution', lazy=True, cascade='all')
 
     @classmethod
     def seed(self, fake):
@@ -114,7 +117,8 @@ class Schedule(db.Model):
     area_code = db.Column(db.String(50), db.ForeignKey(
         'areas.code'), nullable=False)
     space_count = db.Column(db.Integer, nullable=False)
-    booking = db.relationship('Booking', backref='schedule', lazy=True)
+    booking = db.relationship(
+        'Booking', backref='schedule', lazy=True, cascade='all')
 
     @classmethod
     def seed(self, fake):

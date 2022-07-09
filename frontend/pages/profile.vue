@@ -160,6 +160,8 @@ export default {
     },
     handleSetting(e) {
       this.$message.info("Setting");
+      // TODO: change setting to account
+      // switch to account types page
     },
     handleBookingClick(item) {
       console.log(item);

@@ -24,12 +24,29 @@
       ><a-menu-item key="1" v-if="$auth.user.is_admin"
         ><nuxt-link to="/admin">Admin</nuxt-link>
       </a-menu-item>
-
-      <a-menu-item key="2" :title="$auth.user.name"
-        ><nuxt-link to="/profile">Profile</nuxt-link>
-      </a-menu-item>
-
-      <a-menu-item key="3" @click="logout()">Logout </a-menu-item>
+      <a-sub-menu>
+        <template slot="title">
+          <a-avatar size="small" icon="user" shape="square" />
+          <span>{{ $auth.user.name }}</span>
+        </template>
+        <a-menu-item key="user-1"
+          ><nuxt-link to="/profile">
+            <a-icon type="user" />
+            Profile</nuxt-link
+          >
+        </a-menu-item>
+        <a-menu-item key="user-2"
+          ><nuxt-link to="/cart">
+            <a-badge :dot="true" :number-style="{ backgroundColor: '#52c41a' }"
+              ><a-icon type="shopping-cart" /></a-badge
+            >&nbsp; Cart</nuxt-link
+          >
+        </a-menu-item>
+        <a-menu-item key="user-3" @click="logout()">
+          <a-icon type="logout" />
+          Logout
+        </a-menu-item>
+      </a-sub-menu>
     </a-menu>
   </nav>
 </template>

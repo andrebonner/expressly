@@ -183,5 +183,78 @@
         </a-card>
       </a-col>
     </a-row>
+    <a-row>
+      <a-card
+        :style="{ width: '550px', margin: ' 10px auto', padding: '10px' }"
+      >
+        <p style="text-align: center">
+          <a href="#" @click.prevent="showWholesaleModal">Buy from Wholesale</a>
+        </p>
+      </a-card>
+      <a-modal
+        v-model="visible"
+        title="Select Wholesale"
+        on-ok="selectWholeSale"
+      >
+        <template slot="footer">
+          <a-button key="submit" type="primary" @click="selectWholeSale">
+            Next <a-icon type="arrow-right" />
+          </a-button>
+        </template>
+        <a-form :form="wholesaleForm">
+          <a-form-item>
+            <a-select
+              v-decorator="[
+                'wholesale',
+                {
+                  rules: [
+                    { required: true, message: 'Please select a wholesale' },
+                  ],
+                },
+              ]"
+            >
+              <a-select-option
+                v-for="(wholesale, index) in wholesales"
+                :key="index"
+                :value="wholesale.id"
+              >
+                {{ wholesale.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-form>
+      </a-modal>
+    </a-row>
   </article>
 </template>
+<script>
+export default {
+  data() {
+    return {
+      visible: false,
+      wholesales: [
+        { id: "wholesale-1", name: "Wholesale 1" },
+        { id: "wholesale-2", name: "Wholesale 2" },
+      ],
+    };
+  },
+  methods: {
+    showWholesaleModal() {
+      this.visible = true;
+    },
+    selectWholeSale(e) {
+      console.log(e);
+      this.wholesaleForm.validateFields((err, values) => {
+        if (!err) {
+          const { wholesale } = values;
+          this.visible = false;
+          this.$router.push("/wholesale/" + wholesale);
+        }
+      });
+    },
+  },
+  beforeCreate() {
+    this.wholesaleForm = this.$form.createForm(this, { name: "wholesaleForm" });
+  },
+};
+</script>
