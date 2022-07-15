@@ -3,11 +3,7 @@
     <a-row :gutter="12">
       <a-col :span="8">
         <a-card hoverable style="width: 240px">
-          <img
-            slot="cover"
-            alt="example"
-            src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-          />
+          <img slot="cover" alt="example" :src="$auth.user.photo.url" />
           <template slot="actions" class="ant-card-actions">
             <a-icon key="setting" type="setting" @click="handleSetting" />
             <a-icon key="edit" type="edit" @click="handleEdit" />

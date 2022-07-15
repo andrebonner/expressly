@@ -3,7 +3,11 @@
     <a-row :gutter="12">
       <a-col :span="16">
         <a-card>
-          <a-list :pagination="pagination" :data-source="cart.items">
+          <a-list
+            :pagination="pagination"
+            :data-source="cart.items"
+            :loading="loading"
+          >
             <a-empty
               v-if="cart.items.length === 0"
               :image="require('~/assets/img/empty_cart.svg')"
@@ -18,9 +22,9 @@
               slot="renderItem"
               slot-scope="item, index"
             >
-              <img slot="extra" width="272" alt="logo" :src="item.image" />
+              <img slot="extra" width="272" alt="logo" :src="item.photo.url" />
               <a-list-item-meta :description="item.description">
-                <a slot="title" :href="item.href">{{ item.name }}</a>
+                <span slot="title">{{ item.name }}</span>
                 <a-avatar slot="avatar" icon="shopping" />
               </a-list-item-meta>
               {{ item.content }}
@@ -49,7 +53,11 @@
                 </a-row>
               </a-card>
             </a-col> </a-row
-          ><a-button type="primary" @click="handleCheckout" block
+          ><a-button
+            type="primary"
+            @click="handleCheckout"
+            :disabled="cart.items.length === 0"
+            block
             >Checkout</a-button
           >
         </a-card></a-col
@@ -72,79 +80,48 @@ export default {
   },
   data() {
     return {
-      cart: {
-        pagination: {
-          page: 1,
-          pageSize: 10,
-          total: 0,
-          onChange: (page, pageSize) => {
-            this.fetchCart();
-          },
+      loading: false,
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 0,
+        onChange: (page) => {
+          console.log(page);
+          this.fetchCart();
         },
-        items: [
-          {
-            id: "1",
-            name: "Product 1",
-            price: "100",
-            quantity: "1",
-            image:
-              "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-          },
-          {
-            id: "2",
-            name: "Product 2",
-            price: "200",
-            quantity: "2",
-            image:
-              "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-          },
-          {
-            id: "3",
-            name: "Product 3",
-            price: "300",
-            quantity: "3",
-            image:
-              "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-          },
-        ],
-        total: 2000,
+      },
+      cart: {
+        items: [],
+        total: 0,
       },
     };
   },
   methods: {
     handleCheckout() {
-      this.$message.success("Checkout Success");
-      this.$router.push("/cart/checkout");
+      this.checkoutCart();
     },
-    fetchCart() {
-      this.cart.items = [
-        {
-          id: "1",
-          name: "Product 1",
-          price: "100",
-          quantity: "1",
-          image:
-            "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-        },
-        {
-          id: "2",
-          name: "Product 2",
-          price: "200",
-          quantity: "2",
-          image:
-            "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-        },
-        {
-          id: "3",
-          name: "Product 3",
-          price: "300",
-          quantity: "3",
-          image:
-            "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-        },
-      ];
-      this.cart.total = 600;
+    async fetchCart() {
+      this.loading = true;
+      await this.$axios.get("/api/cart").then((res) => {
+        this.loading = false;
+        this.cart = res.data;
+        this.$store.commit("setCart", res.data);
+      });
+    },
+    async checkoutCart() {
+      await this.$axios.put("/api/cart/checkout").then((res) => {
+        this.$message.success("Checkout Success");
+        this.$store.commit("setCart", {
+          items: [],
+          total: 0,
+        });
+        this.$router.push("/cart/checkout");
+      });
     },
   },
+  mounted() {
+    this.fetchCart();
+  },
+  middleware: ["auth"],
 };
 </script>

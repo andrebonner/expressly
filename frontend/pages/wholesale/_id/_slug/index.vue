@@ -1,37 +1,48 @@
 <template>
   <article>
-    <h1>{{ item.name }}</h1>
-    <a-row :gutter="6">
-      <a-col :span="8">
-        <a-card hoverable>
-          <img slot="cover" :alt="item.name" :src="item.image" />
-        </a-card>
-      </a-col>
+    <a-row :gutter="8">
       <a-col :span="16">
-        <a-descriptions :title="item.name">
-          <a-descriptions-item label="Name">{{
-            item.name
-          }}</a-descriptions-item>
-          <a-descriptions-item label="Price">{{
-            item.price
-          }}</a-descriptions-item>
-          <a-descriptions-item label="Category">{{
-            item.category.name
-          }}</a-descriptions-item>
-          <a-descriptions-item label="Description">{{
-            item.description
-          }}</a-descriptions-item>
-        </a-descriptions></a-col
-      >
-    </a-row>
-    <a-row>
-      <a-button
-        type="primary"
-        :style="{ float: 'right' }"
-        @click="handleAddToCart"
-        ><a-icon type="shopping-cart" /> Add to cart
-      </a-button>
-    </a-row>
+        <a-card>
+          <a-row :gutter="6">
+            <a-col :span="8">
+              <a-card hoverable>
+                <img slot="cover" :alt="item.name" :src="item.photo.url" />
+              </a-card>
+            </a-col>
+            <a-col :span="16">
+              <a-descriptions :title="item.name">
+                <a-descriptions-item label="Name">{{
+                  item.name
+                }}</a-descriptions-item>
+                <a-descriptions-item label="Price">{{
+                  item.price
+                }}</a-descriptions-item>
+                <a-descriptions-item label="Category">{{
+                  item.category.name
+                }}</a-descriptions-item>
+                <a-descriptions-item label="Description">{{
+                  item.description
+                }}</a-descriptions-item>
+              </a-descriptions></a-col
+            >
+          </a-row>
+          <a-row>
+            <a-button
+              type="primary"
+              :style="{ float: 'right' }"
+              @click="handleAddToCart"
+              ><a-icon type="shopping-cart" /> Add to cart
+            </a-button>
+          </a-row></a-card
+        ></a-col
+      ><a-col :span="8">
+        <a-card title="Ad Space"
+          ><img
+            src="https://unsplash.com/photos/LvySG1hvuzI/download?ixid=MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjU3MzA5NzI1&force=true&w=640"
+            alt="AD"
+            :style="{ maxWidth: '100%' }"
+        /></a-card> </a-col
+    ></a-row>
   </article>
 </template>
 <script>
@@ -50,27 +61,41 @@ export default {
   data() {
     return {
       item: {
-        id: 1,
-        name: "Item 1",
-        description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        price: 200,
-        image:
-          "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-
+        name: "",
+        price: "",
         category: {
-          id: 1,
-          name: "Category 1",
-          description: "This is category 1",
+          name: "",
+        },
+        description: "",
+        photo: {
+          url: "",
         },
       },
     };
   },
   methods: {
+    async getItem(id) {
+      const { data } = await this.$axios.get(`/api/items/${id}`);
+      this.item = data;
+    },
+    async addToCart(item) {
+      const { data } = await this.$axios
+        .post(`/api/carts/item`, {
+          item_id: item.id,
+          quantity: 1,
+        })
+        .then((res) => {
+          if (res.data.success) {
+            this.$message.success("Item added to cart");
+          } else {
+            this.$message.error(res.data.message);
+          }
+        });
+    },
     handleAddToCart() {
       if (this.$auth.loggedIn) {
         this.$message.success("Added to cart");
-        // TODO: add to cart
+        this.addToCart(this.item);
       } else {
         this.$message.error("You must be logged in to add to cart");
         this.$router.push({
@@ -79,6 +104,9 @@ export default {
         });
       }
     },
+  },
+  mounted() {
+    this.getItem(this.$route.params.id);
   },
 };
 </script>

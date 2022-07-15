@@ -46,7 +46,8 @@ def get_user(current_user):
         return jsonify({'success': False, 'message': 'User does not exist'}), 401
 
     user = {'id': current_user.id, 'email': current_user.email,
-            'name': current_user.name, 'telephone': current_user.telephone, 'is_admin': current_user.is_admin, 'bookings': []}
+            'name': current_user.name, 'telephone': current_user.telephone, 'is_admin': current_user.is_admin, 'account_type': {'id': current_user.account_type.id, 'name': current_user.account_type.name}, 'bookings': [],
+            'photo': {'url': current_user.photo.url, 'id': current_user.photo.id}}
     for booking in current_user.bookings:
         user['bookings'].append({'id': booking.id, 'schedule': {'date': booking.schedule.date, 'time': str(booking.schedule.time),
                                                                 'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},

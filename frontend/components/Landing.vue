@@ -232,10 +232,7 @@ export default {
   data() {
     return {
       visible: false,
-      wholesales: [
-        { id: "wholesale-1", name: "Wholesale 1" },
-        { id: "wholesale-2", name: "Wholesale 2" },
-      ],
+      wholesales: [],
     };
   },
   methods: {
@@ -252,6 +249,13 @@ export default {
         }
       });
     },
+    async getWholesales() {
+      const { data } = await this.$axios.get("/api/wholesales");
+      this.wholesales = data;
+    },
+  },
+  mounted() {
+    this.getWholesales();
   },
   beforeCreate() {
     this.wholesaleForm = this.$form.createForm(this, { name: "wholesaleForm" });

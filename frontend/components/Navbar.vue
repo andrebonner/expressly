@@ -36,9 +36,13 @@
           >
         </a-menu-item>
         <a-menu-item key="user-2"
-          ><nuxt-link to="/cart">
-            <a-badge :dot="true" :number-style="{ backgroundColor: '#52c41a' }"
-              ><a-icon type="shopping-cart" /></a-badge
+          ><nuxt-link to="/cart"
+            ><a-icon type="shopping-cart" />
+            <a-badge
+              v-if="cart.items.length > 0"
+              :dot="true"
+              :number-style="{ backgroundColor: '#52c41a' }"
+            ></a-badge
             >&nbsp; Cart</nuxt-link
           >
         </a-menu-item>
@@ -52,6 +56,12 @@
 </template>
 <script>
 export default {
+  computed: {
+    cart() {
+      console.log(this.$store.state.cart);
+      return this.$store.state.cart;
+    },
+  },
   methods: {
     async logout() {
       await this.$auth.logout();

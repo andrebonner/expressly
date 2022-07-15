@@ -1,6 +1,6 @@
 import random
 from faker import Faker
-from expressly.models import User, Area, Institution, Schedule, Booking
+from expressly.models import User, Area, Institution, Schedule, Booking, AccountType, Category, UserPhoto, Wholesale, Item, ItemPhoto
 from expressly import db
 
 fake = Faker()
@@ -19,11 +19,6 @@ def institution_seed():
 
 
 def institution_area_seed():
-    # areas = Area.query.all()
-    # for area in areas:
-    #     institution = Institution.query.filter_by(
-    #         id=random.randint(1, 3)).first()
-    #     area.institutions.append(institution)
     institutions = Institution.query.all()
     for institution in institutions:
         area = Area.query.filter_by(
@@ -45,4 +40,34 @@ def booking_seed():
 def user_seed():
     for _ in range(3):
         User.seed(fake)
+    db.session.commit()
+
+
+def account_type_seed():
+    AccountType.seed(fake)
+    db.session.commit()
+
+
+def category_seed():
+    Category.seed(fake)
+    db.session.commit()
+
+
+def user_photo_seed():
+    UserPhoto.seed(fake)
+    db.session.commit()
+
+
+def wholesale_seed():
+    Wholesale.seed(fake)
+    db.session.commit()
+
+
+def item_seed():
+    Item.seed(fake)
+    db.session.commit()
+
+
+def item_photo_seed():
+    ItemPhoto.seed(fake)
     db.session.commit()

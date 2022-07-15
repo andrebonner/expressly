@@ -13,16 +13,16 @@
                     v-decorator="[
                       'category',
                       {
-                        initialValue: '1',
+                        initialValue: 1,
                         rules: [
                           { required: true, message: 'Please select category' },
                         ],
                       },
                     ]"
                   >
-                    <a-select-option value="1">Category 1</a-select-option>
-                    <a-select-option value="2">Category 2</a-select-option>
-                    <a-select-option value="3">Category 3</a-select-option>
+                    <a-select-option v-for="c in categories" :key="c.id">{{
+                      c.name
+                    }}</a-select-option>
                   </a-select>
                 </a-form-item>
               </a-form>
@@ -32,6 +32,7 @@
               size="large"
               :pagination="pagination"
               :data-source="items"
+              :loading="loading"
             >
               <a-list-item
                 :key="item.id"
@@ -39,7 +40,7 @@
                 slot-scope="item, index"
               >
                 <template v-for="{ type, text } in actions" slot="actions">
-                  <span :key="type" @click="handleAction(type)">
+                  <span :key="type" @click="handleAction(type, item)">
                     <a-icon :type="type" style="margin-right: 8px" />
                     {{ text }}
                   </span>
@@ -48,11 +49,11 @@
                   slot="extra"
                   width="272"
                   alt="logo"
-                  src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                  :src="item.photo.url"
                 />
                 <a-list-item-meta :description="item.description">
-                  <a slot="title" :href="item.href">{{ item.title }}</a>
-                  <a-avatar slot="avatar" :src="item.avatar" />
+                  <a slot="title" :href="item.href">{{ item.name }}</a>
+                  <a-avatar slot="avatar" icon="item" />
                 </a-list-item-meta>
                 {{ item.content }}
               </a-list-item>
@@ -90,39 +91,10 @@ export default {
   },
   data() {
     return {
+      loading: false,
       category: "1",
-      items: [
-        {
-          href: "https://www.antdv.com/",
-          title: `ant design vue part 1`,
-          avatar:
-            "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-          description:
-            "Ant Design, a design language for background applications, is refined by Ant UED Team.",
-          content:
-            "We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.",
-        },
-        {
-          href: "https://www.antdv.com/",
-          title: `ant design vue part 2`,
-          avatar:
-            "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-          description:
-            "Ant Design, a design language for background applications, is refined by Ant UED Team.",
-          content:
-            "We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.",
-        },
-        {
-          href: "https://www.antdv.com/",
-          title: `ant design vue part 3`,
-          avatar:
-            "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-          description:
-            "Ant Design, a design language for background applications, is refined by Ant UED Team.",
-          content:
-            "We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.",
-        },
-      ],
+      items: [],
+      categories: [],
       pagination: {
         pageSize: 10,
         current: 1,
@@ -144,19 +116,52 @@ export default {
     };
   },
   methods: {
-    handleSearch(value) {
-      this.$message.info(`Searching ${value}`);
-      this.category = value;
+    async getItems(wholesale_id) {
+      this.loading = true;
+      await this.$axios
+        .get(`/api/wholesales/${wholesale_id}/items`)
+        .then((res) => {
+          this.loading = false;
+          this.items = res.data;
+          this.$store.commit("setItems", res.data);
+        });
     },
-    handleAction(type) {
+    async getItemCategories() {
+      const { data } = await this.$axios.get(`/api/items/categories`);
+      this.categories = data;
+    },
+    async addToCart(item) {
+      const { data } = await this.$axios
+        .post(`/api/carts/item`, {
+          item_id: item.id,
+          quantity: 1,
+        })
+        .then((res) => {
+          if (res.data.success) {
+            const { cart } = res.data;
+            this.$message.success("Item added to cart");
+            this.$store.commit("setCart", cart);
+          } else {
+            this.$message.error(res.data.message);
+          }
+        });
+    },
+    handleSearch(value) {
+      this.$message.info(`Searching ...`);
+      this.category = value;
+      this.items = this.$store.state.items.filter(
+        (item) => item.category.id === value
+      );
+    },
+    handleAction(type, item) {
       switch (type) {
         case "eye":
           this.$message.info("View");
-          this.$router.push("/wholesale/1/detail");
+          this.$router.push(`/wholesale/${item.wholesale_id}/${item.id}`);
           break;
         case "shopping":
           if (this.$auth.loggedIn) {
-            // TODO: add to cart
+            this.addToCart(item);
           } else {
             this.$message.error("You must be logged in to add to cart");
             this.$router.push({
@@ -172,5 +177,15 @@ export default {
       }
     },
   },
+  mounted() {
+    const { id } = this.$route.params;
+    this.getItems(id);
+    this.getItemCategories();
+  },
 };
 </script>
+<style>
+.ant-list-item-action {
+  display: flex;
+}
+</style>
