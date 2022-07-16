@@ -47,7 +47,7 @@ class User(db.Model, UserMixin):
         db.session.add(user)
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.password}', '{self.is_admin}')"
+        return f"User('{self.username}', '{self.email}', '{self.password}', '{self.is_admin}','{self.account_type.name}')"
 
 
 inst_areas = db.Table('inst_areas',
@@ -169,7 +169,8 @@ class AccountType(db.Model):
     __tablename__ = 'account_types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    user = db.relationship('User',backref='account_type',lazy=True, cascade='all', uselist=False)
+    user = db.relationship('User', backref='account_type',
+                           lazy=True, cascade='all', uselist=False)
 
     @classmethod
     def seed(self, fake):
