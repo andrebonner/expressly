@@ -1,6 +1,6 @@
 import random
 from faker import Faker
-from expressly.models import User, Area, Institution, Schedule, Booking, AccountType, Category, UserPhoto, Wholesale, Item, ItemPhoto
+from expressly.models import User, Area, Institution, Schedule, Booking, AccountType, Category, UserPhoto, Wholesale, Item, ItemPhoto, InstPhoto
 from expressly import db
 
 fake = Faker()
@@ -70,4 +70,9 @@ def item_seed():
 
 def item_photo_seed():
     ItemPhoto.seed(fake)
+    db.session.commit()
+
+
+def inst_photo_seed():
+    InstPhoto.seed(fake)
     db.session.commit()

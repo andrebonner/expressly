@@ -21,11 +21,12 @@ class User(db.Model, UserMixin):
     bookings = db.relationship(
         'Booking', backref='user', lazy=True, cascade='all')
     account_type_id = db.Column(db.Integer, db.ForeignKey(
-        'account_types.id'), nullable=False)
+        'account_types.id'), nullable=False, default=1)
     institution = db.relationship(
-        'Institution', backref='user', lazy=True, cascade='all')
+        'Institution', backref='user', lazy=True, cascade='all', uselist=False)
     photo = db.relationship('UserPhoto', backref='user',
                             lazy=True, cascade='all', uselist=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -95,6 +96,10 @@ class Institution(db.Model):
     schedules = db.relationship(
         'Schedule', backref='institution', lazy=True, cascade='all')
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    photo = db.relationship(
+        'InstPhoto', backref='institution', lazy=True, uselist=False)
+    wholesale = db.relationship(
+        'Wholesale', backref='institution', lazy=True, cascade='all', uselist=False)
 
     @classmethod
     def seed(self, fake):
@@ -169,6 +174,8 @@ class AccountType(db.Model):
     __tablename__ = 'account_types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
     user = db.relationship('User', backref='account_type',
                            lazy=True, cascade='all', uselist=False)
 
@@ -176,9 +183,11 @@ class AccountType(db.Model):
     def seed(self, fake):
         account_type = ['user', 'church', 'space', 'wholesale']
         for i in range(len(account_type)):
-            a = AccountType.query.filter_by(name=account_type[i]).first()
+            a = AccountType.query.filter_by(
+                name=account_type[i]).first()
             if a is None:
-                account = AccountType(name=account_type[i])
+                account = AccountType(
+                    name=account_type[i], description=fake.text(), price=100*i)
                 db.session.add(account)
 
     def __repr__(self):
@@ -275,17 +284,6 @@ class Item(db.Model):
     def __repr__(self):
         return f"Item('{self.name}', '{self.description}', '{self.content}', '{self.price}', '{self.quantity}', '{self.category_id}', '{self.wholesale_id}')"
 
-    @classmethod
-    def seed(self, fake):
-        wholesale = Wholesale.query.all()
-        for i in range(len(wholesale)):
-            item = Item(name=fake.word(), description=fake.text(),
-                        content=fake.text(), price=random.randint(100, 1000), quantity=random.randint(1, 10), category_id=random.randint(1, 5), wholesale_id=wholesale[i].id)
-            db.session.add(item)
-
-    def __repr__(self):
-        return f"Item('{self.name}', '{self.description}', '{self.content}', '{self.price}', '{self.quantity}', '{self.wholesale_id}')"
-
 
 class ItemPhoto(db.Model):
     __tablename__ = 'item_photos'
@@ -306,19 +304,6 @@ class ItemPhoto(db.Model):
 
     def __repr__(self):
         return f"ItemPhoto('{self.item_id}', '{self.url}')"
-
-    @classmethod
-    def seed(self, fake):
-        item = Item.query.all()
-        for i in range(len(item)):
-            p = ItemPhoto.query.filter_by(item_id=item[i].id).first()
-            if p is None:
-                photo = ItemPhoto(
-                    item_id=item[i].id, url=fake.image_url(width=400, height=400))
-                db.session.add(photo)
-
-    def __repr__(self):
-        return f"ItemPhoto('{self.item_id}', '{self.photo}')"
 
 
 class Cart(db.Model):
@@ -366,3 +351,24 @@ class CartItem(db.Model):
 
     def __repr__(self):
         return f"CartItem('{self.cart_id}', '{self.item_id}', '{self.quantity}', '{self.total}')"
+
+
+class InstPhoto(db.Model):
+    __tablename__ = 'inst_photos'
+    id = db.Column(db.Integer, primary_key=True)
+    inst_id = db.Column(db.Integer, db.ForeignKey(
+        'institutions.id'), nullable=False)
+    url = db.Column(db.String(255), nullable=False)
+
+    @classmethod
+    def seed(self, fake):
+        inst = Institution.query.all()
+        for i in range(len(inst)):
+            p = InstPhoto.query.filter_by(inst_id=inst[i].id).first()
+            if p is None:
+                photo = InstPhoto(
+                    inst_id=inst[i].id, url=fake.image_url(width=400, height=400))
+                db.session.add(photo)
+
+    def __repr__(self):
+        return f"InstPhoto('{self.inst_id}', '{self.url}')"

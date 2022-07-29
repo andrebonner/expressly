@@ -46,12 +46,32 @@ def get_user(current_user):
         return jsonify({'success': False, 'message': 'User does not exist'}), 401
 
     user = {'id': current_user.id, 'email': current_user.email,
-            'name': current_user.name, 'telephone': current_user.telephone, 'is_admin': current_user.is_admin, 'account_type': {'id': current_user.account_type.id, 'name': current_user.account_type.name}, 'bookings': [],
+            'name': current_user.name, 'telephone': current_user.telephone, 'is_admin': current_user.is_admin, 'account_type': {'id': current_user.account_type.id, 'name': current_user.account_type.name},
             'photo': {'url': current_user.photo.url, 'id': current_user.photo.id}}
-    for booking in current_user.bookings:
-        user['bookings'].append({'id': booking.id, 'schedule': {'date': booking.schedule.date, 'time': str(booking.schedule.time),
-                                                                'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},
-                                                                'institution': {'id': booking.schedule.institution.id, 'code': booking.schedule.institution.code, 'name': booking.schedule.institution.name, 'type': booking.schedule.institution.type, 'address': booking.schedule.institution.address, 'telephone': booking.schedule.institution.telephone, 'email': booking.schedule.institution.email}}})
+    # church or space
+    if current_user.account_type.name == 'church' or current_user.account_type.name == 'space' and current_user.institution.id is not None:
+        user['institution'] = {'id': current_user.institution.id, 'name': current_user.institution.name, 'code': current_user.institution.code, 'type': current_user.institution.type, 'telephone': current_user.institution.telephone,
+                               'email': current_user.institution.email, 'address': current_user.institution.address, 'photo': {'url': current_user.institution.photo.url, 'id': current_user.institution.photo.id}, 'schedules': []}
+        for schedule in current_user.institution.schedules:
+            user['institution']['schedules'].append(
+                {'id': schedule.id, 'date': schedule.date, 'time': str(schedule.time), 'space_count': schedule.space_count, 'area': {'id': schedule.area.id,
+                                                                                                                                     'code': schedule.area.code, 'name': schedule.area.name}, 'booking': {}})
+
+    # wholesale
+    elif current_user.account_type.name == 'wholesale' and current_user.institution.id is not None:
+        user['institution'] = {'id': current_user.institution.id, 'name': current_user.institution.name, 'code': current_user.institution.code, 'type': current_user.institution.type, 'telephone': current_user.institution.telephone,
+                               'email': current_user.institution.email, 'address': current_user.institution.address, 'photo': {'url': current_user.institution.photo.url, 'id': current_user.institution.photo.id}}
+        if current_user.institution.wholesale is not None:
+            user['institution']['wholesale'] = {
+                'id': current_user.institution.wholesale.id, 'name': current_user.institution.wholesale.name, 'items': []}
+            for item in current_user.institution.wholesale.items:
+                user['institution']['wholesale']['items'].append(
+                    {'id': item.id, 'name': item.name, 'price': item.price, 'quantity': item.quantity, 'description': item.description, 'content': item.content, 'category': {'id': item.category.id, 'name': item.category.name}, 'photo': {'url': item.photo.url, 'id': item.photo.id}})
+    else:
+        for booking in current_user.bookings:
+            user['bookings'].append({'id': booking.id, 'schedule': {'date': booking.schedule.date, 'time': str(booking.schedule.time),
+                                                                    'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},
+                                                                    'institution': {'id': booking.schedule.institution.id, 'code': booking.schedule.institution.code, 'name': booking.schedule.institution.name, 'type': booking.schedule.institution.type, 'address': booking.schedule.institution.address, 'telephone': booking.schedule.institution.telephone, 'email': booking.schedule.institution.email}}})
 
     return jsonify({'success': True,  'user': user})
 

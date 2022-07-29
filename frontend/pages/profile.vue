@@ -1,6 +1,6 @@
 <template>
   <section>
-    <a-row :gutter="12">
+    <a-row :gutter="6">
       <a-col :span="8">
         <a-card hoverable style="width: 240px">
           <img slot="cover" alt="example" :src="$auth.user.photo.url" />
@@ -11,8 +11,14 @@
           </template>
           <a-card-meta :title="$auth.user.name">
             <template slot="description">
-              <a-avatar size="small" icon="user" />
-              {{ $auth.user.email }}
+              <p>
+                <a-avatar size="small" icon="user" /> {{ $auth.user.email }}
+              </p>
+              <p v-if="$auth.user.account_type.name !== 'user'">
+                {{ capitalize($auth.user.account_type.name) }}
+                :
+                {{ $auth.user.institution.name }}
+              </p>
             </template>
           </a-card-meta>
         </a-card>
@@ -74,9 +80,89 @@
             >
           </template>
         </a-modal>
+        <a-modal
+          v-model="institutionModal"
+          :title="
+            $auth.user.institution.name +
+            ' - ' +
+            capitalize($auth.user.account_type.name)
+          "
+          on-ok="handleInstitutionSubmit"
+        >
+          <a-form layout="vertical" :form="institutionForm">
+            <a-form-item label="Name">
+              <a-input
+                placeholder="Name"
+                v-decorator="[
+                  'name',
+                  {
+                    initialValue: $auth.user.institution.name,
+                    rules: [{ required: true, message: 'Please input name!' }],
+                  },
+                ]"
+              />
+            </a-form-item>
+            <a-form-item label="Address">
+              <a-input
+                placeholder="Address"
+                v-decorator="[
+                  'address',
+                  {
+                    initialValue: $auth.user.institution.address,
+                    rules: [
+                      { required: true, message: 'Please input address!' },
+                    ],
+                  },
+                ]"
+              />
+            </a-form-item>
+            <a-form-item label="Email">
+              <a-input
+                placeholder="Email"
+                v-decorator="[
+                  'email',
+                  {
+                    initialValue: $auth.user.institution.email,
+                    rules: [
+                      { required: true, message: 'Please input email!' },
+                      { type: 'email', message: 'Please input valid email!' },
+                    ],
+                  },
+                ]"
+              />
+            </a-form-item>
+            <a-form-item label="Phone">
+              <a-input
+                placeholder="Phone"
+                v-decorator="[
+                  'telephone',
+                  {
+                    initialValue: $auth.user.institution.telephone,
+                    rules: [
+                      { required: true, message: 'Please input phone!' },
+                      {
+                        pattern: /^1[3456789]\d{9}$/,
+                        message: 'Please input valid phone!',
+                      },
+                    ],
+                  },
+                ]"
+              />
+            </a-form-item>
+          </a-form>
+          <template slot="footer">
+            <a-button type="primary" @click="handleInstitutionSubmit"
+              >Save</a-button
+            >
+          </template>
+        </a-modal>
       </a-col>
-      <a-col :span="12">
-        <a-card title="Bookings" style="width: 100%">
+      <a-col :span="16">
+        <a-card
+          title="Bookings"
+          v-if="$auth.user.account_type.name == 'user'"
+          style="width: 100%"
+        >
           <NuxtLink
             slot="extra"
             to="/bookings"
@@ -105,7 +191,86 @@
               </a-list-item-meta>
             </a-list-item>
           </a-list> </a-card
-      ></a-col>
+        ><a-card
+          title="Orders"
+          v-if="$auth.user.account_type.name == 'user'"
+          style="width: 100%"
+        >
+          <NuxtLink slot="extra" to="/orders" v-if="orders.length"
+            >more</NuxtLink
+          >
+          <a-list
+            item-layout="horizontal"
+            :data-source="orders"
+            :pagination="pagination"
+          >
+            <a-list-item slot="renderItem" slot-scope="item, index">
+              <a-list-item-meta :description="item.content">
+                <a slot="title" @click="handleOrderClick(item)">{{
+                  item.name
+                }}</a>
+                <a-avatar slot="avatar" size="small" icon="shopping-cart" />
+              </a-list-item-meta>
+            </a-list-item>
+          </a-list>
+        </a-card>
+        <a-card
+          title="Schedules"
+          v-if="
+            $auth.user.account_type.name == 'church' ||
+            $auth.user.account_type.name == 'space'
+          "
+          style="width: 100%"
+        >
+          <NuxtLink
+            slot="extra"
+            to="/schedules"
+            v-if="$auth.user.institution.schedules.length"
+            >more</NuxtLink
+          >
+          <a-list
+            item-layout="horizontal"
+            :data-source="$auth.user.institution.schedules"
+            :pagination="pagination"
+          >
+            <a-list-item slot="renderItem" slot-scope="item, index">
+              <a-list-item-meta
+                :description="
+                  item.area.name + ' - ' + $auth.user.institution.name
+                "
+              >
+                <a slot="title" @click="handleScheduleClick(item)">{{
+                  dateFormat(item.date) + " @ " + timeFormat(item.time)
+                }}</a>
+                <a-avatar slot="avatar" size="small" icon="calendar" />
+              </a-list-item-meta>
+            </a-list-item>
+          </a-list>
+        </a-card>
+        <a-card
+          title="Wholesale Items"
+          v-if="$auth.user.account_type.name == 'wholesale'"
+          style="width: 100%"
+        >
+          <NuxtLink slot="extra" to="/wholesale" v-if="items.length"
+            >more</NuxtLink
+          >
+          <a-list
+            item-layout="horizontal"
+            :data-source="items"
+            :pagination="pagination"
+          >
+            <a-list-item slot="renderItem" slot-scope="item, index">
+              <a-list-item-meta :description="item.content">
+                <a slot="title" @click="handleWholesaleClick(item)">{{
+                  item.name
+                }}</a>
+                <a-avatar slot="avatar" size="small" icon="shopping-cart" />
+              </a-list-item-meta>
+            </a-list-item>
+          </a-list>
+        </a-card>
+      </a-col>
     </a-row>
   </section>
 </template>
@@ -127,12 +292,16 @@ export default {
   data() {
     return {
       profileModal: false,
+      institutionModal: false,
       pagination: {
         onChange: (page) => {
           console.log(page);
         },
         pageSize: 3,
       },
+      orders: [],
+
+      items: [],
     };
   },
   beforeCreate() {
@@ -151,13 +320,27 @@ export default {
 
       return d.format("LL");
     },
+    capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    },
     handleEdit(e) {
       this.profileModal = true;
     },
     handleSetting(e) {
-      this.$message.info("Setting");
-      // TODO: change setting to account
-      // switch to account types page
+      // change setting to account
+      if (this.$auth.user.account_type.name === "user") {
+        // switch to account types page
+        this.$router.push("/upgrade");
+      } else {
+        // TODO: load modal based on account type
+
+        if (
+          this.$auth.user.account_type.name === "church" ||
+          this.$auth.user.account_type.name === "space"
+        ) {
+          this.institutionModal = true;
+        }
+      }
     },
     handleBookingClick(item) {
       console.log(item);
@@ -175,6 +358,24 @@ export default {
             if (res.data.success) {
               this.profileModal = false;
               this.$message.info("Profile Updated");
+            } else {
+              this.$message.error(res.data.message);
+            }
+          });
+      });
+    },
+    handleInstitutionSubmit(e) {
+      console.log(e);
+      this.institutionForm.validateFields((err, values) => {
+        if (err) {
+          return;
+        }
+        this.$axios
+          .put("/api/institutions/" + this.$auth.user.institution.id, values)
+          .then((res) => {
+            if (res.data.success) {
+              this.institutionModal = false;
+              this.$message.info("Institution Updated");
             } else {
               this.$message.error(res.data.message);
             }

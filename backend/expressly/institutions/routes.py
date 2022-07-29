@@ -19,7 +19,8 @@ def index():
             'telephone': institution.telephone,
             'email': institution.email,
             'address': institution.address,
-            'areas': []
+            'areas': [],
+            'photo': {'id': institution.photo.id, 'url': institution.photo.url},
         }
         for area in institution.areas:
             i['areas'].append({'code': area.code, 'name': area.name})
@@ -37,7 +38,8 @@ def show(type):
                  'name': institution.name, 'type': institution.type,
                  'telephone': institution.telephone,
                  'email': institution.email,
-                 'address': institution.address, }
+                 'address': institution.address, 'photo': {'id': institution.photo.id, 'url': institution.photo.url}
+                 }
             insts.append(i)
     return jsonify(insts)
 

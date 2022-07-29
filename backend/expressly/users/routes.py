@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request, current_app
 from expressly.utils import send_email, token_required, generate_random_password
 import jwt
 from expressly.extensions import bcrypt, db
-from expressly.models import User
+from expressly.models import User, AccountType
 
 
 users = Blueprint('users', __name__)
@@ -110,3 +110,34 @@ def delete_user(current_user, id):
     db.session.delete(user)
     db.session.commit()
     return jsonify({'success': True, 'message': 'User deleted'})
+
+
+@users.route('/users/account_types', methods=['GET'])
+def get_account_types():
+    account_types = AccountType.query.all()
+    at = []
+
+    for account_type in account_types:
+        at.append({'id': account_type.id,
+                   'name': account_type.name, 'description': account_type.description, 'price': account_type.price})
+
+    return jsonify(at)
+
+
+@users.route('/users/upgrade', methods=['PUT'])
+@token_required
+def upgrade_user(current_user):
+    if current_user is None:
+        return jsonify({'success': False, 'message': 'User does not exist'}), 401
+    data = request.get_json()
+    if data is None:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    if 'payment_method' not in data or 'plan' not in data or 'credit_card_number' not in data or 'credit_card_expiry' not in data or 'credit_card_cvv' not in data or 'credit_card_holder' not in data:
+        return jsonify({'success': False, 'message': 'Missing data'}), 400
+    # TODO: create payment subscription
+    account_type = AccountType.query.filter_by(id=data['plan']).first()
+    if account_type is None:
+        return jsonify({'success': False, 'message': 'Account type does not exist'}), 400
+    current_user.account_type_id = account_type.id
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'User upgraded'})

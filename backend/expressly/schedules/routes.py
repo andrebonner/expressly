@@ -60,8 +60,8 @@ def get_schedule(type, id):
     if schedule.institution.type == type:
         s = {'id': schedule.id,
              'code': schedule.area.code,
-             'area': [],
-             'institution': [],
+             'area': {},
+             'institution': {},
              'space_count': schedule.space_count,
              'date': schedule.date.strftime("%x"),
              'time': str(schedule.time),
@@ -76,6 +76,7 @@ def get_schedule(type, id):
             'address': schedule.institution.address,
             'telephone': schedule.institution.telephone,
             'email': schedule.institution.email,
+            'photo': {'id': schedule.institution.photo.id, 'url': schedule.institution.photo.url},
         }
 
     return jsonify(s)

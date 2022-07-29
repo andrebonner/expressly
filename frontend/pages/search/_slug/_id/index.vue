@@ -1,46 +1,63 @@
 <template>
   <section>
-    <a-row>
-      <a-col :span="6">
-        <a-card hoverable :style="{ width: '240px', padding: '4px' }">
-          <img
-            slot="cover"
-            :alt="capitalize(type)"
-            src="https://images.unsplash.com/photo-1564540574859-0dfb63985953?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=470&q=80"
-          />
-        </a-card>
-      </a-col>
-      <a-col :span="12">
-        <a-descriptions
-          :title="
-            capitalize(type) +
-            ' Details  - ' +
-            (schedule.date ? dateFormat(schedule.date) : '')
-          "
-        >
-          <a-descriptions-item label="Name">
-            {{ schedule.institution ? schedule.institution.name : "" }}
-          </a-descriptions-item>
-          <a-descriptions-item label="Telephone">
-            {{ schedule.institution ? schedule.institution.telephone : "" }}
-          </a-descriptions-item>
-          <a-descriptions-item label="Location">
-            {{ schedule.area ? schedule.area.name : "" }}
-          </a-descriptions-item>
+    <a-row :gutter="6">
+      <a-col :span="18">
+        <a-row :gutter="6">
+          <a-col :span="6">
+            <a-card hoverable :style="{ width: '240px', padding: '4px' }">
+              <img
+                slot="cover"
+                :alt="capitalize(type)"
+                :src="schedule.institution.photo.url"
+              />
+            </a-card>
+          </a-col>
+          <a-col :span="12">
+            <a-card title="Booking Details">
+              <div slot="extra" :style="{ minWidth: '200px' }">
+                <a-button
+                  type="primary"
+                  :style="{ float: 'right' }"
+                  @click="openBookModal"
+                >
+                  Book {{ schedule.time ? timeFormat(schedule.time) : "" }}
+                  <a-icon type="right" />
+                </a-button>
+              </div>
+              <a-descriptions
+                :title="
+                  capitalize(type) +
+                  ' Details  - ' +
+                  (schedule.date ? dateFormat(schedule.date) : '')
+                "
+              >
+                <a-descriptions-item label="Name">
+                  {{ schedule.institution ? schedule.institution.name : "" }}
+                </a-descriptions-item>
+                <a-descriptions-item label="Telephone">
+                  {{
+                    schedule.institution ? schedule.institution.telephone : ""
+                  }}
+                </a-descriptions-item>
+                <a-descriptions-item label="Location">
+                  {{ schedule.area ? schedule.area.name : "" }}
+                </a-descriptions-item>
 
-          <a-descriptions-item label="Address">
-            {{ schedule.institution ? schedule.institution.address : "" }}
-          </a-descriptions-item>
-        </a-descriptions></a-col
-      > </a-row
-    ><a-row
-      ><a-button
-        type="primary"
-        :style="{ float: 'right' }"
-        @click="openBookModal"
-      >
-        Book {{ schedule.time ? timeFormat(schedule.time) : "" }}
-        <a-icon type="right" /> </a-button
+                <a-descriptions-item label="Address">
+                  {{ schedule.institution ? schedule.institution.address : "" }}
+                </a-descriptions-item>
+              </a-descriptions></a-card
+            ></a-col
+          > </a-row
+        ><a-row :gutter="8"> </a-row>
+      </a-col>
+      <a-col :span="6">
+        <a-card title="Ad space">
+          <img
+            src="https://gw.alipayobjects.com/zos/rmsportal/nywPmnTAvTmLusPxHPSu.png"
+            alt=""
+          />
+        </a-card> </a-col
     ></a-row>
     <a-modal
       v-model="visible"
@@ -95,7 +112,23 @@ export default {
       type: "",
       visible: false,
       loading: false,
-      schedule: {},
+      schedule: {
+        institution: {
+          name: "",
+          telephone: "",
+          address: "",
+          email: "",
+          photo: {
+            url: "",
+          },
+        },
+        area: {
+          name: "",
+        },
+
+        date: "",
+        time: "",
+      },
     };
   },
   props: {},

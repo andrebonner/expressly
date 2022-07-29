@@ -41,7 +41,7 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
         db.session.commit()
-        # from expressly.faker import user_seed, area_seed, institution_seed, institution_area_seed, schedule_seed, booking_seed, account_type_seed, category_seed, user_photo_seed, wholesale_seed, item_seed, item_photo_seed
+        # from expressly.faker import user_seed, area_seed, institution_seed, institution_area_seed, schedule_seed, booking_seed, account_type_seed, category_seed, user_photo_seed, wholesale_seed, item_seed, item_photo_seed, inst_photo_seed
         # user_seed()
         # area_seed()
         # institution_seed()
@@ -54,5 +54,6 @@ def create_app(config_class=Config):
         # wholesale_seed()
         # item_seed()
         # item_photo_seed()
+        # inst_photo_seed()
 
     return app
