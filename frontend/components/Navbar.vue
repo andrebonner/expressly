@@ -39,7 +39,7 @@
           ><nuxt-link to="/cart"
             ><a-icon type="shopping-cart" />
             <a-badge
-              v-if="cart.items.length > 0"
+              v-if="cart.items != undefined && cart.items.length > 0"
               :dot="true"
               :number-style="{ backgroundColor: '#52c41a' }"
             ></a-badge
@@ -58,16 +58,21 @@
 export default {
   computed: {
     cart() {
-      console.log(this.$store.state.cart);
       return this.$store.state.cart;
     },
   },
   methods: {
     async logout() {
       await this.$auth.logout();
+      this.$store.commit("setCart", { items: [] });
       this.$message.success("Logged out successfully");
       this.$router.replace("/login");
     },
+  },
+  mounted() {
+    if (this.$auth.loggedIn && this.$auth.user?.cart) {
+      this.$store.commit("setCart", this.$auth.user.cart);
+    }
   },
 };
 </script>

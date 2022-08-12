@@ -27,6 +27,8 @@ class User(db.Model, UserMixin):
     photo = db.relationship('UserPhoto', backref='user',
                             lazy=True, cascade='all', uselist=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    cart = db.relationship('Cart', backref='user',
+                           lazy=True, cascade='all', uselist=False)
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)

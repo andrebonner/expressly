@@ -89,6 +89,11 @@ export default {
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
     };
   },
+  computed: {
+    cart() {
+      return this.$store.state.cart;
+    },
+  },
   data() {
     return {
       loading: false,
@@ -131,6 +136,10 @@ export default {
       this.categories = data;
     },
     async addToCart(item) {
+      if (this.cart.items.find((i) => i.id === item.id)) {
+        this.$message.error("Item is already in cart");
+        return;
+      }
       const { data } = await this.$axios
         .post(`/api/carts/item`, {
           item_id: item.id,
@@ -156,7 +165,6 @@ export default {
     handleAction(type, item) {
       switch (type) {
         case "eye":
-          this.$message.info("View");
           this.$router.push(`/wholesale/${item.wholesale_id}/${item.id}`);
           break;
         case "shopping":

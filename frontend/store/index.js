@@ -6,9 +6,6 @@ export const state = () => ({
     items: [],
     total: 0,
   },
-  user: null,
-  token: null,
-  error: null,
   loading: false,
 });
 
@@ -17,9 +14,6 @@ export const getter = {
   institutions: (state) => state.institutions,
   items: (state) => state.items,
   cart: (state) => state.cart,
-  user: (state) => state.user,
-  token: (state) => state.token,
-  error: (state) => state.error,
   loading: (state) => state.loading,
 };
 
@@ -35,15 +29,6 @@ export const mutations = {
   },
   setCart(state, cart) {
     state.cart = cart;
-  },
-  setUser(state, user) {
-    state.user = user;
-  },
-  setToken(state, token) {
-    state.token = token;
-  },
-  setError(state, error) {
-    state.error = error;
   },
   setLoading(state, loading) {
     state.loading = loading;

@@ -46,8 +46,11 @@ def get_user(current_user):
         return jsonify({'success': False, 'message': 'User does not exist'}), 401
 
     user = {'id': current_user.id, 'email': current_user.email,
-            'name': current_user.name, 'telephone': current_user.telephone, 'is_admin': current_user.is_admin, 'account_type': {'id': current_user.account_type.id, 'name': current_user.account_type.name},
-            'photo': {'url': current_user.photo.url, 'id': current_user.photo.id}}
+            'name': current_user.name, 'telephone': current_user.telephone, 'is_admin': current_user.is_admin, 'account_type': {'id': current_user.account_type.id, 'name': current_user.account_type.name}}
+    if current_user.photo is not None:
+        user['photo'] = {'url': current_user.photo.url,
+                         'id': current_user.photo.id}
+
     # church or space
     if current_user.account_type.name == 'church' or current_user.account_type.name == 'space' and current_user.institution.id is not None:
         user['institution'] = {'id': current_user.institution.id, 'name': current_user.institution.name, 'code': current_user.institution.code, 'type': current_user.institution.type, 'telephone': current_user.institution.telephone,
@@ -68,20 +71,27 @@ def get_user(current_user):
                 user['institution']['wholesale']['items'].append(
                     {'id': item.id, 'name': item.name, 'price': item.price, 'quantity': item.quantity, 'description': item.description, 'content': item.content, 'category': {'id': item.category.id, 'name': item.category.name}, 'photo': {'url': item.photo.url, 'id': item.photo.id}})
     else:
+        user['bookings'] = []
+        user['cart'] = {}
         for booking in current_user.bookings:
             user['bookings'].append({'id': booking.id, 'schedule': {'date': booking.schedule.date, 'time': str(booking.schedule.time),
                                                                     'area': {'id': booking.schedule.area.id, 'code': booking.schedule.area.code, 'name': booking.schedule.area.name},
                                                                     'institution': {'id': booking.schedule.institution.id, 'code': booking.schedule.institution.code, 'name': booking.schedule.institution.name, 'type': booking.schedule.institution.type, 'address': booking.schedule.institution.address, 'telephone': booking.schedule.institution.telephone, 'email': booking.schedule.institution.email}}})
+        if current_user.cart is not None:
+            user['cart'] = {'id': current_user.cart.id, 'items': []}
+            for item in current_user.cart.items:
+                user['cart']['items'].append(
+                    {'id': item.id, 'name': item.item.name, 'price': item.item.price, 'quantity': item.quantity, 'total': item.total})
 
     return jsonify({'success': True,  'user': user})
 
 
-@auth.route('/auth/logout', methods=['POST'])
+@ auth.route('/auth/logout', methods=['POST'])
 def logout():
     return jsonify({'success': True})
 
 
-@auth.route('/auth/forgot_password', methods=['POST'])
+@ auth.route('/auth/forgot_password', methods=['POST'])
 def forgot_password():
     data = request.get_json()
     user = User.query.filter_by(email=data['email']).first()

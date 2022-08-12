@@ -30,8 +30,10 @@
             <a-button
               type="primary"
               :style="{ float: 'right' }"
+              :disabled="isAlreadyInCart()"
               @click="handleAddToCart"
-              ><a-icon type="shopping-cart" /> Add to cart
+              ><a-icon type="shopping-cart" />
+              {{ isAlreadyInCart() ? "Added to cart" : "Add to cart" }}
             </a-button>
           </a-row></a-card
         ></a-col
@@ -57,6 +59,11 @@ export default {
       ],
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
     };
+  },
+  computed: {
+    cart() {
+      return this.$store.state.cart;
+    },
   },
   data() {
     return {
@@ -86,7 +93,9 @@ export default {
         })
         .then((res) => {
           if (res.data.success) {
+            const { cart } = res.data;
             this.$message.success("Item added to cart");
+            this.$store.commit("setCart", cart);
           } else {
             this.$message.error(res.data.message);
           }
@@ -104,9 +113,13 @@ export default {
         });
       }
     },
+    isAlreadyInCart() {
+      console.log(this.item, this.cart);
+      return this.cart.items.find((i) => i.id == this.item.id);
+    },
   },
   mounted() {
-    this.getItem(this.$route.params.id);
+    this.getItem(this.$route.params.slug);
   },
 };
 </script>

@@ -1,9 +1,14 @@
 <template>
   <section>
     <a-row :gutter="6">
-      <a-col :span="8">
+      <a-col :span="6">
         <a-card hoverable style="width: 240px">
-          <img slot="cover" alt="example" :src="$auth.user.photo.url" />
+          <img
+            slot="cover"
+            v-if="$auth.user.photo != undefined"
+            alt="example"
+            :src="$auth.user.photo.url"
+          />
           <template slot="actions" class="ant-card-actions">
             <a-icon key="setting" type="setting" @click="handleSetting" />
             <a-icon key="edit" type="edit" @click="handleEdit" />
@@ -82,6 +87,7 @@
         </a-modal>
         <a-modal
           v-model="institutionModal"
+          v-if="$auth.user.account_type.name !== 'user'"
           :title="
             $auth.user.institution.name +
             ' - ' +
@@ -157,7 +163,7 @@
           </template>
         </a-modal>
       </a-col>
-      <a-col :span="16">
+      <a-col :span="18">
         <a-card
           title="Bookings"
           v-if="$auth.user.account_type.name == 'user'"
@@ -305,7 +311,21 @@ export default {
     };
   },
   beforeCreate() {
-    this.profileForm = this.$form.createForm(this);
+    this.profileForm = this.$form.createForm(this, {
+      name: "profileForm",
+      onFieldsChange(changedFields) {
+        console.log(changedFields);
+      },
+    });
+    this.institutionForm = this.$form.createForm(this, {
+      name: "institutionForm",
+      onFieldsChange(changedFields) {
+        console.log(changedFields);
+      },
+    });
+  },
+  mounted() {
+    console.log(this.$auth.user);
   },
   methods: {
     timeFormat(time) {
